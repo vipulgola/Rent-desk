@@ -1,2 +1,2 @@
 # Rent-desk
-App to management tenant and payment transactions.
+App to manage tenant and payment transactions.

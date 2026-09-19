@@ -71,4 +71,24 @@
             android:id="@+id/action_transactionListFragment_to_tenantDetailsFragment"
             app:destination="@id/tenantDetailsFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.get.detail.rentdesk.ui.settings.SettingsFragment"
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_appLockSetupFragment"
+            app:destination="@id/appLockSetupFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/appLockSetupFragment"
+        android:name="com.get.detail.rentdesk.ui.settings.AppLockSetupFragment"
+        android:label="@string/set_up_app_lock"
+        tools:layout="@layout/fragment_app_lock_setup">
+        <argument
+            android:name="lockType"
+            app:argType="string" />
+    </fragment>
 </navigation>

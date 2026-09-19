@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.get.detail.rentmatrix"
+    namespace = "com.get.detail.rentdesk"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.get.detail.rentmatrix"
+        applicationId = "com.get.detail.rentdesk"
         minSdk = 24
         targetSdk = 35
         versionCode = 1

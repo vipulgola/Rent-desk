@@ -7,10 +7,10 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/launcher_icon_adaptive"
-        android:label="Rent Matrix"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/launcher_icon_adaptive"
         android:supportsRtl="true"
-        android:theme="@style/Theme.RentMatrix">
+        android:theme="@style/Theme.RentDesk">
 
         <activity
             android:name=".ui.MainActivity"

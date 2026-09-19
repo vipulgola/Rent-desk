@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.get.detail.rentmatrix.ui.login.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_addressListFragment"
+            app:destination="@id/addressListFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addressListFragment"
+        android:name="com.get.detail.rentmatrix.ui.address.AddressListFragment"
+        android:label="Addresses"
+        tools:layout="@layout/fragment_address_list">
+        <action
+            android:id="@+id/action_addressListFragment_to_propertyListFragment"
+            app:destination="@id/propertyListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/propertyListFragment"
+        android:name="com.get.detail.rentmatrix.ui.property.PropertyListFragment"
+        android:label="Properties"
+        tools:layout="@layout/fragment_property_list">
+        <argument
+            android:name="addressId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_propertyListFragment_to_tenantDetailsFragment"
+            app:destination="@id/tenantDetailsFragment" />
+        <action
+            android:id="@+id/action_propertyListFragment_to_transactionListFragment"
+            app:destination="@id/transactionListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/tenantDetailsFragment"
+        android:name="com.get.detail.rentmatrix.ui.tenant.TenantDetailsFragment"
+        android:label="Tenant Details"
+        tools:layout="@layout/fragment_tenant_details">
+        <argument
+            android:name="propertyId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_tenantDetailsFragment_to_transactionListFragment"
+            app:destination="@id/transactionListFragment"
+            app:popUpTo="@id/propertyListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/transactionListFragment"
+        android:name="com.get.detail.rentmatrix.ui.transaction.TransactionListFragment"
+        android:label="Transactions"
+        tools:layout="@layout/fragment_transaction_list">
+        <argument
+            android:name="propertyId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_transactionListFragment_to_tenantDetailsFragment"
+            app:destination="@id/tenantDetailsFragment" />
+    </fragment>
+</navigation>

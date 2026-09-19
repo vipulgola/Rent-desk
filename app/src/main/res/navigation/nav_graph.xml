@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.get.detail.rentmatrix.ui.login.LoginFragment"
+        android:name="com.get.detail.rentdesk.ui.login.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
         <action
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/addressListFragment"
-        android:name="com.get.detail.rentmatrix.ui.address.AddressListFragment"
+        android:name="com.get.detail.rentdesk.ui.address.AddressListFragment"
         android:label="Addresses"
         tools:layout="@layout/fragment_address_list">
         <action
@@ -29,7 +29,7 @@
 
     <fragment
         android:id="@+id/propertyListFragment"
-        android:name="com.get.detail.rentmatrix.ui.property.PropertyListFragment"
+        android:name="com.get.detail.rentdesk.ui.property.PropertyListFragment"
         android:label="Properties"
         tools:layout="@layout/fragment_property_list">
         <argument
@@ -47,7 +47,7 @@
 
     <fragment
         android:id="@+id/tenantDetailsFragment"
-        android:name="com.get.detail.rentmatrix.ui.tenant.TenantDetailsFragment"
+        android:name="com.get.detail.rentdesk.ui.tenant.TenantDetailsFragment"
         android:label="Tenant Details"
         tools:layout="@layout/fragment_tenant_details">
         <argument
@@ -61,7 +61,7 @@
 
     <fragment
         android:id="@+id/transactionListFragment"
-        android:name="com.get.detail.rentmatrix.ui.transaction.TransactionListFragment"
+        android:name="com.get.detail.rentdesk.ui.transaction.TransactionListFragment"
         android:label="Transactions"
         tools:layout="@layout/fragment_transaction_list">
         <argument

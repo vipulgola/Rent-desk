@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "RentMatrix"
+rootProject.name = "RentDesk"
 include(":app")
  

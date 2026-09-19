@@ -60,6 +60,9 @@ dependencies {
     // Gson
     implementation(libs.gson)
 
+    // App lock biometric authentication
+    implementation(libs.androidx.biometric)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.get.detail.rentdesk.BuildConfig
 import com.get.detail.rentdesk.R
+import com.get.detail.rentdesk.backup.AutoBackupScheduler
 import com.get.detail.rentdesk.backup.BackupEnvelope
 import com.get.detail.rentdesk.backup.DriveBackupFile
 import com.get.detail.rentdesk.backup.DriveBackupPreferences
@@ -42,6 +43,7 @@ class SettingsFragment : Fragment() {
     private lateinit var lockManager: AppLockManager
     private lateinit var drivePreferences: DriveBackupPreferences
     private lateinit var localBackupManager: LocalBackupManager
+    private lateinit var autoBackupScheduler: AutoBackupScheduler
     private lateinit var sessionManager: SessionManager
     private var updatingUi = false
     private var pendingVerifiedAction: (() -> Unit)? = null
@@ -98,6 +100,7 @@ class SettingsFragment : Fragment() {
         lockManager = AppLockManager(requireContext())
         drivePreferences = DriveBackupPreferences(requireContext())
         localBackupManager = LocalBackupManager(requireContext())
+        autoBackupScheduler = AutoBackupScheduler(requireContext())
         sessionManager = SessionManager(requireContext())
         setupAppLockSettings()
         setupDriveSettings()
@@ -146,18 +149,41 @@ class SettingsFragment : Fragment() {
     private fun setupDriveSettings() {
         binding.btnConnectDrive.setOnClickListener { authorizeDrive(DriveAction.CONNECT) }
         binding.btnBackupNow.setOnClickListener { authorizeDrive(DriveAction.BACKUP) }
+        binding.btnAutomaticBackup.setOnClickListener {
+            val connected = drivePreferences.connectedEmail.equals(
+                BuildConfig.DRIVE_BACKUP_ACCOUNT,
+                ignoreCase = true
+            )
+            if (!connected) {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.automatic_backup_requires_drive,
+                    Toast.LENGTH_LONG
+                ).show()
+            } else if (drivePreferences.automaticBackupEnabled) {
+                autoBackupScheduler.disable()
+                refreshDriveUi()
+            } else {
+                autoBackupScheduler.enable()
+                refreshDriveUi()
+            }
+        }
         binding.btnRestoreBackup.setOnClickListener { authorizeDrive(DriveAction.RESTORE) }
         binding.btnExportReadable.setOnClickListener { authorizeDrive(DriveAction.EXPORT) }
         binding.btnDisconnectDrive.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setMessage(R.string.disconnect_drive_confirmation)
                 .setPositiveButton(R.string.disconnect) { _, _ ->
+                    autoBackupScheduler.disable()
                     drivePreferences.clearConnection()
                     refreshDriveUi()
                 }
                 .setNegativeButton(R.string.cancel, null)
                 .show()
         }
+        androidx.work.WorkManager.getInstance(requireContext())
+            .getWorkInfosForUniqueWorkLiveData(AutoBackupScheduler.UNIQUE_WORK_NAME)
+            .observe(viewLifecycleOwner) { refreshDriveUi() }
     }
 
     private fun refreshUi() {
@@ -202,6 +228,15 @@ class SettingsFragment : Fragment() {
         } ?: getString(R.string.no_backup_yet)
         binding.btnConnectDrive.visibility = if (connected) View.GONE else View.VISIBLE
         binding.btnBackupNow.isEnabled = connected
+        binding.btnAutomaticBackup.isEnabled = connected
+        binding.btnAutomaticBackup.setText(
+            if (drivePreferences.automaticBackupEnabled) {
+                R.string.disable_automatic_backup
+            } else {
+                R.string.enable_automatic_backup
+            }
+        )
+        binding.tvAutomaticBackupStatus.text = automaticBackupStatusText()
         binding.btnRestoreBackup.isEnabled = connected
         binding.btnExportReadable.isEnabled = connected
         binding.btnDisconnectDrive.visibility = if (connected) View.VISIBLE else View.GONE
@@ -268,6 +303,12 @@ class SettingsFragment : Fragment() {
                     return@launch
                 }
                 drivePreferences.connectedEmail = account.emailAddress
+                if (
+                    pendingDriveAction == DriveAction.CONNECT &&
+                    drivePreferences.automaticBackupEnabled
+                ) {
+                    autoBackupScheduler.enqueuePending(immediate = true)
+                }
                 when (pendingDriveAction) {
                     DriveAction.CONNECT -> {
                         setDriveBusy(false)
@@ -315,6 +356,10 @@ class SettingsFragment : Fragment() {
                 }
                 drivePreferences.lastSeenBackupId = result.id
                 drivePreferences.lastBackupAt = result.modifiedTime
+                drivePreferences.uploadedChangeVersion = drivePreferences.localChangeVersion
+                if (drivePreferences.automaticBackupEnabled) {
+                    drivePreferences.automaticBackupStatus = DriveBackupPreferences.STATUS_IDLE
+                }
                 Toast.makeText(requireContext(), R.string.backup_complete, Toast.LENGTH_SHORT).show()
             } catch (error: Exception) {
                 showDriveError(error)
@@ -380,6 +425,10 @@ class SettingsFragment : Fragment() {
                 setDriveBusy(true)
                 withContext(Dispatchers.IO) { localBackupManager.restore(backup) }
                 drivePreferences.lastSeenBackupId = file.id
+                drivePreferences.uploadedChangeVersion = drivePreferences.localChangeVersion
+                if (drivePreferences.automaticBackupEnabled) {
+                    drivePreferences.automaticBackupStatus = DriveBackupPreferences.STATUS_IDLE
+                }
                 Toast.makeText(requireContext(), R.string.restore_complete, Toast.LENGTH_SHORT).show()
             } catch (error: Exception) {
                 showDriveError(error)
@@ -424,9 +473,31 @@ class SettingsFragment : Fragment() {
         binding.progressDrive.visibility = if (busy) View.VISIBLE else View.GONE
         binding.btnConnectDrive.isEnabled = !busy
         binding.btnBackupNow.isEnabled = !busy && drivePreferences.connectedEmail != null
+        binding.btnAutomaticBackup.isEnabled = !busy && drivePreferences.connectedEmail != null
         binding.btnRestoreBackup.isEnabled = !busy && drivePreferences.connectedEmail != null
         binding.btnExportReadable.isEnabled = !busy && drivePreferences.connectedEmail != null
         binding.btnDisconnectDrive.isEnabled = !busy
+    }
+
+    private fun automaticBackupStatusText(): String {
+        if (!drivePreferences.automaticBackupEnabled) {
+            return getString(R.string.automatic_backup_disabled)
+        }
+        return when (drivePreferences.automaticBackupStatus) {
+            DriveBackupPreferences.STATUS_PENDING ->
+                getString(R.string.automatic_backup_pending)
+            DriveBackupPreferences.STATUS_RUNNING ->
+                getString(R.string.automatic_backup_running)
+            DriveBackupPreferences.STATUS_AUTHORIZATION_REQUIRED ->
+                getString(R.string.automatic_backup_authorization_required)
+            DriveBackupPreferences.STATUS_CONFLICT ->
+                getString(R.string.automatic_backup_conflict)
+            DriveBackupPreferences.STATUS_FAILED ->
+                getString(R.string.automatic_backup_failed)
+            else -> drivePreferences.lastAutomaticBackupAt?.let {
+                getString(R.string.last_automatic_backup, it)
+            } ?: getString(R.string.automatic_backup_idle)
+        }
     }
 
     private fun chooseLockType() {

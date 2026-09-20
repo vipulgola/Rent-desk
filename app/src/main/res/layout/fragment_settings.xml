@@ -158,6 +158,13 @@
                     android:layout_marginTop="4dp"
                     android:textColor="@color/text_secondary" />
 
+                <TextView
+                    android:id="@+id/tvAutomaticBackupStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textColor="@color/text_secondary" />
+
                 <com.google.android.material.progressindicator.LinearProgressIndicator
                     android:id="@+id/progressDrive"
                     android:layout_width="match_parent"
@@ -180,6 +187,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/back_up_now" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAutomaticBackup"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/enable_automatic_backup" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRestoreBackup"

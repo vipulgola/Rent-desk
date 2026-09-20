@@ -1,7 +1,9 @@
 package com.get.detail.rentdesk.ui.address
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.annotation.SuppressLint
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -10,21 +12,30 @@ import com.get.detail.rentdesk.data.local.dao.AddressWithPropertyCount
 import com.get.detail.rentdesk.databinding.ItemAddressBinding
 
 class AddressAdapter(
-    private val onClick: (AddressWithPropertyCount) -> Unit
+    private val onClick: (AddressWithPropertyCount) -> Unit,
+    private val onEdit: (AddressWithPropertyCount) -> Unit
 ) : ListAdapter<AddressWithPropertyCount, AddressAdapter.AddressViewHolder>(AddressDiffCallback()) {
+
+    var isEditMode = false
+        @SuppressLint("NotifyDataSetChanged")
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AddressViewHolder {
         val binding = ItemAddressBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return AddressViewHolder(binding, onClick)
+        return AddressViewHolder(binding, onClick, onEdit)
     }
 
     override fun onBindViewHolder(holder: AddressViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class AddressViewHolder(
+    inner class AddressViewHolder(
         private val binding: ItemAddressBinding,
-        private val onClick: (AddressWithPropertyCount) -> Unit
+        private val onClick: (AddressWithPropertyCount) -> Unit,
+        private val onEdit: (AddressWithPropertyCount) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(addressWithCount: AddressWithPropertyCount) {
@@ -35,6 +46,8 @@ class AddressAdapter(
                 addressWithCount.propertyCount
             )
             binding.root.setOnClickListener { onClick(addressWithCount) }
+            binding.btnEditAddress.visibility = if (isEditMode) View.VISIBLE else View.GONE
+            binding.btnEditAddress.setOnClickListener { onEdit(addressWithCount) }
         }
     }
 

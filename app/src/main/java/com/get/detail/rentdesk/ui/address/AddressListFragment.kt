@@ -4,9 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -29,7 +34,7 @@ class AddressListFragment : Fragment() {
 
     private val viewModel: AddressViewModel by viewModels {
         val database = AppDatabase.getDatabase(requireContext())
-        val repository = RentRepository(database.addressDao(), database.propertyTenantDao(), database.transactionDao())
+        val repository = RentRepository(requireContext(), database.addressDao(), database.propertyTenantDao(), database.transactionDao())
         AddressViewModelFactory(repository)
     }
 
@@ -46,12 +51,19 @@ class AddressListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = AddressAdapter { addressWithCount ->
-            val bundle = Bundle().apply {
-                putString("addressId", addressWithCount.dataUUID)
+        setupMenu()
+
+        adapter = AddressAdapter(
+            onClick = { addressWithCount ->
+                val bundle = Bundle().apply {
+                    putString("addressId", addressWithCount.dataUUID)
+                }
+                findNavController().navigate(R.id.action_addressListFragment_to_propertyListFragment, bundle)
+            },
+            onEdit = { addressWithCount ->
+                showAddressDialog(addressWithCount.dataUUID, addressWithCount.address)
             }
-            findNavController().navigate(R.id.action_addressListFragment_to_propertyListFragment, bundle)
-        }
+        )
         binding.rvAddresses.adapter = adapter
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -64,14 +76,41 @@ class AddressListFragment : Fragment() {
         }
 
         binding.fabAddAddress.setOnClickListener {
-            showAddAddressDialog()
+            showAddressDialog()
         }
     }
 
-    private fun showAddAddressDialog() {
+    private fun setupMenu() {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.address_list_menu, menu)
+            }
+
+            override fun onPrepareMenu(menu: Menu) {
+                menu.findItem(R.id.action_edit_mode)?.title =
+                    if (::adapter.isInitialized && adapter.isEditMode) {
+                        getString(R.string.done)
+                    } else {
+                        getString(R.string.action_edit)
+                    }
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                if (menuItem.itemId != R.id.action_edit_mode) return false
+                adapter.isEditMode = !adapter.isEditMode
+                requireActivity().invalidateOptionsMenu()
+                return true
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+    }
+
+    private fun showAddressDialog(addressId: String? = null, currentName: String = "") {
         val context = requireContext()
         val editText = EditText(context)
-        editText.hint = "Address"
+        editText.hint = getString(R.string.address)
+        editText.setText(currentName)
+        editText.setSelection(editText.text.length)
         
         val container = FrameLayout(context)
         val params = FrameLayout.LayoutParams(
@@ -85,19 +124,23 @@ class AddressListFragment : Fragment() {
         container.addView(editText)
         
         AlertDialog.Builder(context)
-            .setTitle("Add Address")
+            .setTitle(if (addressId == null) R.string.add_address else R.string.edit_address)
             .setView(container)
-            .setPositiveButton("Save") { _, _ ->
-                val addressName = editText.text.toString()
+            .setPositiveButton(R.string.save) { _, _ ->
+                val addressName = editText.text.toString().trim()
                 if (addressName.isNotBlank()) {
-                    val address = Address(
-                        dataUUID = UUID.randomUUID().toString(),
-                        address = addressName
-                    )
-                    viewModel.insertAddress(address)
+                    if (addressId == null) {
+                        val address = Address(
+                            dataUUID = UUID.randomUUID().toString(),
+                            address = addressName
+                        )
+                        viewModel.insertAddress(address)
+                    } else {
+                        viewModel.updateAddressName(addressId, addressName)
+                    }
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

@@ -9,7 +9,30 @@ It creates manual snapshots of the local Room database and stores them in the
 Google Drive account rentdesk111@gmail.com.
 
 This is a backup system, not live synchronization. Data is transferred only
-when the user selects Back up now, Restore backup, or Export readable copy.
+when the user selects Back up now, Restore backup, or Export readable copy, or
+when enabled automatic backup detects a local database change.
+
+AUTOMATIC BACKUP
+----------------
+
+Automatic backup can be enabled or disabled from Settings. After an address,
+property, tenant, or transaction is added, edited, or deleted, WorkManager waits
+45 seconds to group nearby changes. It then uploads a snapshot when internet
+connectivity is available. It first downloads the newest Drive backup, compares
+matching entries by modification time, keeps the latest address, property, or
+transaction, and uploads the merged snapshot. It asks the user to reconnect if
+Google authorization has expired.
+
+Each address, property, and transaction now stores its creation time and latest
+modification time as UTC epoch milliseconds. Existing records receive the
+database migration time. The address and property lists include edit buttons
+for changing an address or property name without changing its creation time.
+
+Property records also store monthly rent, electricity price per unit, the latest
+meter reading, and the outstanding balance. Transactions store the payment date
+as a UTC timestamp, plus the reading and amount received. dd/mm/yyyy is only used
+for display and input. These values are included in JSON
+backups and readable CSV exports.
 
 
 FEATURES ADDED
@@ -219,4 +242,3 @@ The readable ZIP is intentionally visible and contains tenant information,
 including mobile and Aadhaar details. Anyone who can access the Google Drive
 account or download the ZIP may be able to read that information. The Google
 account should therefore use a strong password and two-step verification.
-

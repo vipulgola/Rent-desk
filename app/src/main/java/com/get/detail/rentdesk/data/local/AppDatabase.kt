@@ -17,7 +17,7 @@ import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 
 @Database(
     entities = [PropertyTenantInfo::class, RecordTransaction::class, Address::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -37,13 +37,93 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "rent_desk_database"
                 )
-                    .addMigrations(MIGRATION_2_3)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
+    }
+}
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        val migratedAt = System.currentTimeMillis()
+        listOf("addresses", "property_tenant_info").forEach { table ->
+            db.execSQL(
+                "ALTER TABLE `$table` ADD COLUMN `createdAtUtc` INTEGER NOT NULL DEFAULT 0"
+            )
+            db.execSQL(
+                "ALTER TABLE `$table` ADD COLUMN `modifiedAtUtc` INTEGER NOT NULL DEFAULT 0"
+            )
+            db.execSQL(
+                "UPDATE `$table` SET `createdAtUtc` = $migratedAt, `modifiedAtUtc` = $migratedAt"
+            )
+        }
+        db.execSQL(
+            "ALTER TABLE `property_tenant_info` ADD COLUMN `monthlyRent` INTEGER NOT NULL DEFAULT 0"
+        )
+        db.execSQL(
+            "ALTER TABLE `property_tenant_info` ADD COLUMN `electricityPricePerUnit` REAL NOT NULL DEFAULT 0"
+        )
+        db.execSQL(
+            "ALTER TABLE `property_tenant_info` ADD COLUMN `meterReading` INTEGER NOT NULL DEFAULT 0"
+        )
+        db.execSQL(
+            "ALTER TABLE `property_tenant_info` ADD COLUMN `balanceAmount` REAL NOT NULL DEFAULT 0"
+        )
+        db.execSQL(
+            """
+            UPDATE `property_tenant_info`
+            SET `balanceAmount` = COALESCE(
+                (
+                    SELECT CAST(`balanceAmount` AS REAL)
+                    FROM `record_transaction`
+                    WHERE `record_transaction`.`propertyId` = `property_tenant_info`.`propertyId`
+                    ORDER BY `monthYear` DESC
+                    LIMIT 1
+                ),
+                0
+            )
+            """.trimIndent()
+        )
+
+        db.execSQL(
+            """
+            CREATE TABLE `record_transaction_new` (
+                `transactionId` TEXT NOT NULL,
+                `propertyId` TEXT NOT NULL,
+                `paymentDateUtc` INTEGER NOT NULL DEFAULT 0,
+                `reading` INTEGER NOT NULL,
+                `amountPaid` REAL NOT NULL,
+                `createdAtUtc` INTEGER NOT NULL DEFAULT 0,
+                `modifiedAtUtc` INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY(`transactionId`),
+                FOREIGN KEY(`propertyId`) REFERENCES `property_tenant_info`(`propertyId`)
+                    ON UPDATE NO ACTION ON DELETE CASCADE
+            )
+            """.trimIndent()
+        )
+        db.execSQL(
+            """
+            INSERT INTO `record_transaction_new`
+                (`transactionId`, `propertyId`, `paymentDateUtc`, `reading`,
+                 `amountPaid`, `createdAtUtc`, `modifiedAtUtc`)
+            SELECT `transactionId`, `propertyId`,
+                   CAST(strftime('%s', `monthYear` || '-01T00:00:00Z') AS INTEGER) * 1000,
+                   `reading`, CAST(`amountPaid` AS REAL), $migratedAt, $migratedAt
+            FROM `record_transaction`
+            """.trimIndent()
+        )
+        db.execSQL("DROP TABLE `record_transaction`")
+        db.execSQL("ALTER TABLE `record_transaction_new` RENAME TO `record_transaction`")
+        db.execSQL(
+            "CREATE INDEX `index_record_transaction_propertyId` ON `record_transaction` (`propertyId`)"
+        )
+        db.execSQL(
+            "CREATE INDEX `index_record_transaction_paymentDateUtc` ON `record_transaction` (`paymentDateUtc`)"
+        )
     }
 }
 

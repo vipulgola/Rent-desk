@@ -1,18 +1,36 @@
 package com.get.detail.rentdesk.domain.usecase
 
-import com.get.detail.rentdesk.data.local.entity.RecordTransaction
+data class RentBreakdown(
+    val consumedUnits: Int,
+    val electricityCost: Double,
+    val previousBalance: Double,
+    val rentAmount: Double,
+    val totalAmount: Double
+)
 
-class RentCalculator {
-    /**
-     * Calculates the balance amount for a new transaction.
-     * This is a placeholder for the exact rent calculation rules to be provided later.
-     */
-    fun calculateBalance(
-        rentAmount: Int,
-        amountPaid: Int,
-        previousBalance: Int = 0
-    ): Int {
-        // Simple logic for now: (Rent + Previous Balance) - Amount Paid
-        return (rentAmount + previousBalance) - amountPaid
+object RentCalculator {
+    fun calculate(
+        previousReading: Int,
+        currentReading: Int,
+        electricityPricePerUnit: Double,
+        previousBalance: Double,
+        monthlyRent: Int
+    ): RentBreakdown {
+        require(currentReading >= previousReading) {
+            "Current reading cannot be lower than the previous reading"
+        }
+        val consumedUnits = currentReading - previousReading
+        val electricityCost = consumedUnits * electricityPricePerUnit
+        val rentAmount = monthlyRent.toDouble()
+        return RentBreakdown(
+            consumedUnits = consumedUnits,
+            electricityCost = electricityCost,
+            previousBalance = previousBalance,
+            rentAmount = rentAmount,
+            totalAmount = electricityCost + previousBalance + rentAmount
+        )
     }
+
+    fun remainingBalance(totalAmount: Double, amountReceived: Double): Double =
+        totalAmount - amountReceived
 }

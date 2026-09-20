@@ -9,6 +9,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.get.detail.rentdesk.R
 import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 import com.get.detail.rentdesk.databinding.ItemTransactionBinding
+import com.get.detail.rentdesk.utils.PaymentDateUtils
+import java.text.NumberFormat
+import java.util.Locale
 
 class TransactionAdapter(
     private val onEditClick: (RecordTransaction) -> Unit,
@@ -39,14 +42,19 @@ class TransactionAdapter(
     inner class TransactionViewHolder(private val binding: ItemTransactionBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(transaction: RecordTransaction) {
-            binding.tvTransactionMonth.text = transaction.monthYear.toString()
-            binding.tvAmountPaid.text = binding.root.context.getString(R.string.amount_paid, transaction.amountPaid)
-            binding.tvBalanceAmount.text = binding.root.context.getString(R.string.balance_amount, transaction.balanceAmount)
+            binding.tvTransactionMonth.text = binding.root.context.getString(
+                R.string.payment_date_display,
+                PaymentDateUtils.format(transaction.paymentDateUtc)
+            )
+            binding.tvAmountPaid.text = binding.root.context.getString(
+                R.string.amount_received_display,
+                CURRENCY_FORMAT.format(transaction.amountPaid)
+            )
             binding.tvReading.text = binding.root.context.getString(R.string.meter_reading, transaction.reading)
 
             // Visual feedback for selection
             binding.cbSelected.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
-            binding.btnEditTransaction.visibility = if (isSelectionMode) View.GONE else View.VISIBLE
+            binding.btnEditTransaction.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
             binding.cbSelected.isChecked = selectedItems.contains(transaction)
             binding.root.isSelected = selectedItems.contains(transaction)
 
@@ -96,5 +104,10 @@ class TransactionAdapter(
         override fun areContentsTheSame(oldItem: RecordTransaction, newItem: RecordTransaction): Boolean {
             return oldItem == newItem
         }
+    }
+
+    companion object {
+        private val CURRENCY_FORMAT = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+
     }
 }

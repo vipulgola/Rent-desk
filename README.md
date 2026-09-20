@@ -26,3 +26,17 @@ must authorize the same account.
 
 Backups are shared snapshots rather than live synchronization. If another device
 has produced a newer snapshot, Rent Desk warns before creating a newer version.
+
+Automatic backup can be enabled from Settings after Drive is connected. Local
+address, property, tenant, and transaction changes are grouped for 45 seconds,
+then WorkManager runs when a network connection is available. Before uploading,
+it downloads the newest Drive snapshot and merges matching records using each
+record's modification timestamp. Google authorization still requires the user
+to reconnect when consent can no longer be renewed silently.
+
+Each property also stores its monthly rent, electricity price per unit, latest
+meter reading, and outstanding balance. When recording a payment, the user
+selects a dd/mm/yyyy payment date and current reading, then sees electricity cost,
+previous balance, rent, and the total to collect before entering the amount
+received. Saving updates the property reading and balance together with the
+new transaction. These values are included in JSON backups and CSV exports.

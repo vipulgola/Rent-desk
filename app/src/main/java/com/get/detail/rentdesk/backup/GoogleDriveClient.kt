@@ -4,6 +4,7 @@ package com.get.detail.rentdesk.backup
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import java.io.ByteArrayOutputStream
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
@@ -161,7 +162,7 @@ class GoogleDriveClient(private val accessToken: String) {
                 ?: ByteArray(0)
             if (status !in 200..299) {
                 val detail = response.toString(Charsets.UTF_8).take(500)
-                error("Google Drive request failed ($status): $detail")
+                throw DriveRequestException(status, detail)
             }
             response
         } finally {
@@ -188,3 +189,8 @@ class GoogleDriveClient(private val accessToken: String) {
         private const val MAX_BACKUPS = 5
     }
 }
+
+class DriveRequestException(
+    val statusCode: Int,
+    detail: String
+) : IOException("Google Drive request failed ($statusCode): $detail")

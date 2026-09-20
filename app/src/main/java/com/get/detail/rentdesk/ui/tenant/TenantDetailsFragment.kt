@@ -31,7 +31,7 @@ class TenantDetailsFragment : Fragment() {
 
     private val viewModel: TenantViewModel by viewModels {
         val database = AppDatabase.getDatabase(requireContext())
-        val repository = RentRepository(database.addressDao(), database.propertyTenantDao(), database.transactionDao())
+        val repository = RentRepository(requireContext(), database.addressDao(), database.propertyTenantDao(), database.transactionDao())
         TenantViewModelFactory(repository)
     }
 
@@ -75,6 +75,15 @@ class TenantDetailsFragment : Fragment() {
                 viewModel.property.collect { property ->
                     binding.btnVacateProperty.visibility =
                         if (property?.tenantInfo != null) View.VISIBLE else View.GONE
+                    property?.let {
+                        binding.etMonthlyRent.setText(
+                            it.monthlyRent.takeIf { value -> value > 0 }?.toString().orEmpty()
+                        )
+                        binding.etElectricityPrice.setText(
+                            formatElectricityPrice(it.electricityPricePerUnit)
+                        )
+                        binding.etMeterReading.setText(it.meterReading.toString())
+                    }
                     property?.tenantInfo?.let { info ->
                         binding.etTenantName.setText(info.name)
                         binding.etMobileNumber.setText(info.mobileNumber)
@@ -124,6 +133,12 @@ class TenantDetailsFragment : Fragment() {
         val mobile = binding.etMobileNumber.text.toString()
         val aadhaar = binding.etAadhaarNumber.text.toString()
         val address = binding.etAddress.text.toString()
+        val monthlyRent = binding.etMonthlyRent.text?.toString()?.trim()?.toIntOrNull()
+        val electricityPrice = binding.etElectricityPrice.text?.toString()
+            ?.trim()
+            ?.replace(',', '.')
+            ?.toDoubleOrNull()
+        val meterReading = binding.etMeterReading.text?.toString()?.trim()?.toIntOrNull()
 
         val selectedYear = joiningYear
         val selectedMonth = joiningMonth
@@ -138,6 +153,21 @@ class TenantDetailsFragment : Fragment() {
             return
         }
         binding.tilJoiningDate.error = null
+        binding.tilMonthlyRent.error = null
+        binding.tilElectricityPrice.error = null
+        binding.tilMeterReading.error = null
+        if (monthlyRent == null || monthlyRent <= 0) {
+            binding.tilMonthlyRent.error = getString(R.string.invalid_monthly_rent)
+            return
+        }
+        if (electricityPrice == null || electricityPrice < 0.0 || !electricityPrice.isFinite()) {
+            binding.tilElectricityPrice.error = getString(R.string.invalid_electricity_price)
+            return
+        }
+        if (meterReading == null || meterReading < 0) {
+            binding.tilMeterReading.error = getString(R.string.invalid_property_meter_reading)
+            return
+        }
 
         val tenantInfo = TenantInfo(
             name = name,
@@ -149,8 +179,20 @@ class TenantDetailsFragment : Fragment() {
         )
 
         propertyId?.let { id ->
-            viewModel.updatePropertyWithTenant(id, tenantInfo)
+            viewModel.updatePropertyWithTenant(
+                id,
+                tenantInfo,
+                monthlyRent,
+                electricityPrice,
+                meterReading
+            )
         }
+    }
+
+    private fun formatElectricityPrice(value: Double): String = when {
+        value <= 0.0 -> ""
+        value % 1.0 == 0.0 -> value.toLong().toString()
+        else -> value.toString()
     }
 
     private fun showJoiningDatePicker() {

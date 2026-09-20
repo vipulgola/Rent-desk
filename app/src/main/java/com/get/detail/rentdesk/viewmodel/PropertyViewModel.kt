@@ -30,6 +30,10 @@ class PropertyViewModel(private val repository: RentRepository) : ViewModel() {
         repository.insertProperty(property)
     }
 
+    fun updateProperty(property: PropertyTenantInfo) = viewModelScope.launch {
+        repository.updateProperty(property)
+    }
+
     fun deleteProperty(property: PropertyTenantInfo) = viewModelScope.launch {
         repository.deleteProperty(property)
     }

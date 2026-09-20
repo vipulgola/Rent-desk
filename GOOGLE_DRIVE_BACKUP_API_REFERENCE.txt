@@ -1,0 +1,704 @@
+RENT DESK - BACKUP API REFERENCE
+================================
+
+PURPOSE
+-------
+
+This document explains the important APIs used by the Rent Desk Google Drive
+backup feature. It describes what each API does, where it is used, and why it
+was selected.
+
+
+1. GOOGLE PLAY SERVICES AUTHORIZATION API
+=========================================
+
+Dependency:
+com.google.android.gms:play-services-auth:21.6.0
+
+Main classes:
+
+- Identity
+- AuthorizationClient
+- AuthorizationRequest
+- AuthorizationResult
+- Scope
+
+Purpose:
+This API securely asks the user for permission to access Google Drive. Google,
+not Rent Desk, displays the account-selection and consent screens.
+
+Important calls:
+
+Identity.getAuthorizationClient(activity)
+    Creates the Google authorization client associated with the current
+    Android Activity.
+
+AuthorizationRequest.builder()
+    Starts the construction of an authorization request.
+
+setRequestedScopes(...)
+    Specifies exactly which Google Drive permissions Rent Desk needs.
+
+setPrompt(AuthorizationRequest.Prompt.SELECT_ACCOUNT)
+    Displays the Google account selector when the user presses Connect Google
+    Drive. This lets the user explicitly select rentdesk111@gmail.com.
+
+AuthorizationClient.authorize(request)
+    Sends the permission request to Google Play Services.
+
+AuthorizationResult.hasResolution()
+    Indicates whether Google needs to display a consent or account-selection
+    screen before access can be granted.
+
+AuthorizationResult.pendingIntent
+    Provides the secure Google screen that Rent Desk launches for user action.
+
+getAuthorizationResultFromIntent(intent)
+    Reads Google's result after the user completes the permission screen.
+
+AuthorizationResult.accessToken
+    Provides the temporary OAuth access token used to call Google Drive APIs.
+    Rent Desk uses this token in memory and does not permanently save it.
+
+Why this API is used:
+
+- The app never needs the user's Google password.
+- Google handles account selection and permission approval securely.
+- It supports Android OAuth clients identified by package name and signing
+  certificate SHA-1.
+
+
+2. GOOGLE OAUTH SCOPES
+======================
+
+Scope: Scopes.DRIVE_APPFOLDER
+Full value: https://www.googleapis.com/auth/drive.appdata
+
+Purpose:
+Allows Rent Desk to store operational JSON backups in Google Drive's hidden
+appDataFolder.
+
+Why it is used:
+Users cannot normally browse or accidentally edit files in this hidden folder.
+It is suitable for backups that are meant to be restored by the app.
+
+
+Scope: Scopes.DRIVE_FILE
+Full value: https://www.googleapis.com/auth/drive.file
+
+Purpose:
+Allows Rent Desk to create and manage files that the app creates in the user's
+visible Google Drive.
+
+Why it is used:
+It lets the app create the visible RentDesk Exports folder and upload readable
+ZIP exports without requesting permission to access every file in Drive.
+
+
+3. GOOGLE DRIVE REST API V3
+===========================
+
+Base URLs:
+
+Metadata operations:
+https://www.googleapis.com/drive/v3
+
+Upload operations:
+https://www.googleapis.com/upload/drive/v3
+
+Rent Desk calls the Drive REST API directly using HTTPS. Every request includes:
+
+Authorization: Bearer <temporary-access-token>
+Accept: application/json
+
+
+3.1 GET ACCOUNT INFORMATION
+---------------------------
+
+Request:
+GET /drive/v3/about?fields=user(emailAddress,displayName)
+
+Purpose:
+Returns the email address and display name of the authorized Google account.
+
+Why it is used:
+Rent Desk verifies that the user selected rentdesk111@gmail.com before allowing
+backup operations.
+
+
+3.2 LIST BACKUPS
+----------------
+
+Request:
+GET /drive/v3/files
+
+Important query parameters:
+
+spaces=appDataFolder
+    Searches only the hidden application-data folder.
+
+q=name contains 'rentdesk_backup_' and trashed = false
+    Returns only active files that look like Rent Desk backups.
+
+orderBy=modifiedTime desc
+    Places the newest backup first.
+
+pageSize=100
+    Requests up to 100 matching backup records.
+
+fields=files(id,name,modifiedTime,size)
+    Requests only the information needed by the app.
+
+Purpose:
+Used to display available backups, find the newest backup, and remove old
+backups.
+
+
+3.3 UPLOAD A BACKUP
+-------------------
+
+Request:
+POST /upload/drive/v3/files?uploadType=multipart
+
+Content type:
+multipart/related
+
+Purpose:
+Uploads file metadata and JSON backup content in one request.
+
+Backup metadata includes:
+
+- File name
+- MIME type: application/json
+- Parent folder: appDataFolder
+
+Why multipart upload is used:
+The backup files are small enough to send in one request, and the metadata and
+file contents can be created together.
+
+
+3.4 DOWNLOAD A BACKUP
+---------------------
+
+Request:
+GET /drive/v3/files/{fileId}?alt=media
+
+Purpose:
+Downloads the actual JSON content of a selected backup so Rent Desk can
+validate and restore it.
+
+
+3.5 DELETE AN OLD BACKUP
+------------------------
+
+Request:
+DELETE /drive/v3/files/{fileId}
+
+Purpose:
+Removes backups older than the latest five retained snapshots.
+
+Why it is used:
+It prevents the hidden backup folder from growing forever.
+
+
+3.6 FIND THE READABLE EXPORT FOLDER
+-----------------------------------
+
+Request:
+GET /drive/v3/files
+
+Search condition:
+
+name = 'RentDesk Exports'
+and mimeType = 'application/vnd.google-apps.folder'
+and trashed = false
+
+Purpose:
+Looks for the visible RentDesk Exports folder before attempting to create a
+new one.
+
+
+3.7 CREATE THE READABLE EXPORT FOLDER
+-------------------------------------
+
+Request:
+POST /drive/v3/files?fields=id
+
+JSON metadata:
+
+name: RentDesk Exports
+mimeType: application/vnd.google-apps.folder
+
+Purpose:
+Creates the visible export folder if it does not already exist.
+
+
+3.8 UPLOAD A READABLE ZIP EXPORT
+--------------------------------
+
+Request:
+POST /upload/drive/v3/files?uploadType=multipart
+
+MIME type:
+application/zip
+
+Parent:
+The ID of the RentDesk Exports folder.
+
+Purpose:
+Uploads a ZIP containing CSV, JSON, and metadata files that can be opened
+without using Rent Desk.
+
+
+4. JAVA HTTP CONNECTION API
+===========================
+
+Main classes:
+
+- java.net.URL
+- java.net.HttpURLConnection
+- java.net.URLEncoder
+- java.io.ByteArrayOutputStream
+
+Purpose:
+Sends direct HTTPS requests to Google Drive.
+
+Important behavior:
+
+requestMethod
+    Selects GET, POST, or DELETE.
+
+Authorization header
+    Sends the temporary OAuth access token to Google.
+
+connectTimeout = 20 seconds
+    Stops a connection attempt that takes too long.
+
+readTimeout = 45 seconds
+    Stops a response that takes too long to arrive.
+
+setFixedLengthStreamingMode(...)
+    Tells the server the exact upload size.
+
+URLEncoder.encode(...)
+    Safely places search queries and file IDs into URLs.
+
+Why this API is used:
+It provides the required Drive communication without adding a larger Google
+Drive client library to the Android application.
+
+
+5. ROOM DATABASE API
+====================
+
+Main APIs:
+
+- AppDatabase
+- Room DAO interfaces
+- withTransaction
+- @Query
+- @Insert
+- OnConflictStrategy.REPLACE
+
+Purpose:
+Reads the local data for backup and writes restored data back into the app.
+
+
+5.1 BACKUP DATABASE METHODS
+---------------------------
+
+AddressDao.getAllAddressesList()
+    Reads every saved address as a normal Kotlin List.
+
+PropertyTenantDao.getAllPropertiesList()
+    Reads all properties together with their stored tenant information.
+
+TransactionDao.getAllTransactions()
+    Reads every recorded rent/payment transaction.
+
+These methods run inside database.withTransaction so the backup is created from
+one consistent view of the database.
+
+
+5.2 RESTORE DATABASE METHODS
+----------------------------
+
+TransactionDao.deleteAllTransactions()
+PropertyTenantDao.deleteAllProperties()
+AddressDao.deleteAllAddresses()
+    Remove the current local records before restoring the selected snapshot.
+
+AddressDao.insertAddresses(addresses)
+PropertyTenantDao.insertProperties(properties)
+TransactionDao.insertTransactions(transactions)
+    Insert complete record lists efficiently instead of inserting one row at a
+    time.
+
+Restore order:
+
+1. Delete transactions
+2. Delete properties
+3. Delete addresses
+4. Insert addresses
+5. Insert properties
+6. Insert transactions
+
+Why this order is used:
+It respects the relationships between addresses, properties, and transactions.
+
+The complete restore runs inside withTransaction. If one database step fails,
+Room rolls back the operation instead of leaving a partly restored database.
+
+
+6. GSON JSON API
+================
+
+Dependency:
+com.google.code.gson:gson:2.11.0
+
+Main classes:
+
+- Gson
+- GsonBuilder
+- JsonObject
+- JsonParser
+
+Purpose:
+Converts Kotlin backup objects into JSON and converts downloaded JSON back into
+Kotlin objects.
+
+Important calls:
+
+GsonBuilder().setPrettyPrinting().create()
+    Creates readable, indented JSON output.
+
+gson.toJson(...)
+    Converts backup data or metadata into JSON text.
+
+gson.fromJson(...)
+    Converts downloaded JSON into BackupEnvelope objects.
+
+JsonParser.parseString(...)
+    Reads JSON returned by the Google Drive API.
+
+Why JSON is used:
+
+- It is portable and human-readable.
+- It preserves all Room entity data.
+- It is easy to validate and restore.
+- It supports future backup format versions.
+
+
+7. SHA-256 MESSAGE DIGEST API
+=============================
+
+Class:
+java.security.MessageDigest
+
+Algorithm:
+SHA-256
+
+Purpose:
+Creates a checksum of the backup data.
+
+Backup process:
+
+1. Convert BackupData to JSON bytes.
+2. Calculate its SHA-256 value.
+3. Store the value in BackupEnvelope.checksumSha256.
+
+Restore process:
+
+1. Convert the downloaded BackupData to JSON bytes again.
+2. Recalculate SHA-256.
+3. Compare it with the stored checksum.
+4. Reject the backup if the values do not match.
+
+Why it is used:
+It detects accidental damage or unexpected modification of backup contents.
+It is an integrity check, not encryption.
+
+
+8. ZIP API
+==========
+
+Main classes:
+
+- java.util.zip.ZipOutputStream
+- java.util.zip.ZipEntry
+- java.io.ByteArrayOutputStream
+
+Purpose:
+Creates the readable ZIP export directly in memory.
+
+Files added to the ZIP:
+
+- addresses.csv
+- properties.csv
+- tenants.csv
+- transactions.csv
+- complete_backup.json
+- metadata.json
+
+Why it is used:
+One ZIP is easier to upload, download, store, and share than several separate
+files.
+
+
+9. CSV GENERATION
+=================
+
+CSV files are generated using Kotlin string-building functions.
+
+Safety handling:
+
+- Every value is enclosed in double quotation marks.
+- Double quotation marks inside a value are escaped.
+- Values beginning with =, +, -, or @ receive a leading apostrophe.
+
+Why this is important:
+It keeps commas and quotation marks inside data from breaking CSV columns and
+reduces the risk of spreadsheet applications treating tenant data as formulas.
+
+
+10. KOTLIN COROUTINES AND ANDROID LIFECYCLE APIs
+================================================
+
+Main APIs:
+
+- lifecycleScope.launch
+- withContext(Dispatchers.IO)
+
+Purpose:
+Runs slow database, JSON, ZIP, and network operations away from the main Android
+UI thread.
+
+lifecycleScope.launch
+    Starts work connected to the Settings screen's lifecycle. Work is cancelled
+    when the lifecycle is destroyed.
+
+withContext(Dispatchers.IO)
+    Moves blocking database and network work to threads intended for input and
+    output operations.
+
+Why these APIs are used:
+They help prevent the application interface from freezing during backup or
+restore operations.
+
+
+11. ANDROID ACTIVITY RESULT API
+===============================
+
+Main APIs:
+
+- registerForActivityResult
+- ActivityResultContracts.StartIntentSenderForResult
+- IntentSenderRequest
+
+Purpose:
+Launches Google's authorization screen and safely receives its result.
+
+Why it is used:
+This is the lifecycle-aware Android approach for handling results from another
+screen or system component.
+
+
+12. ANDROID SHAREDPREFERENCES API
+=================================
+
+Class:
+DriveBackupPreferences
+
+Stored values:
+
+- connectedEmail
+- lastBackupAt
+- lastSeenBackupId
+
+Purpose:
+Remembers the local backup connection state and helps detect a backup created
+by another device or session.
+
+Important limitation:
+Disconnect Drive clears these local values, but it does not delete existing
+Drive backups and does not revoke permission from the Google account.
+
+
+13. ANDROID BUILD CONFIG API
+============================
+
+Configured value:
+BuildConfig.DRIVE_BACKUP_ACCOUNT
+
+Value:
+rentdesk111@gmail.com
+
+Purpose:
+Keeps the required backup account in one application configuration value.
+
+Why it is used:
+The UI and account-verification logic use the same value, reducing the risk of
+different email addresses being hard-coded in different files.
+
+
+14. ANDROID BUILD AND DEVICE APIs
+=================================
+
+BuildConfig.VERSION_NAME
+    Records which Rent Desk version created a backup.
+
+Build.MANUFACTURER
+Build.MODEL
+    Record the device that created the backup.
+
+Why they are used:
+This information helps the user identify the correct backup before restoring.
+
+
+15. ANDROID MATERIAL UI APIs
+============================
+
+Important components:
+
+- MaterialCardView
+- MaterialButton
+- LinearProgressIndicator
+- AlertDialog
+- Toast
+
+Purpose:
+
+MaterialCardView
+    Groups Google Drive backup controls on the Settings screen.
+
+MaterialButton
+    Provides Connect, Backup, Restore, Export, and Disconnect actions.
+
+LinearProgressIndicator
+    Shows when a Drive operation is running.
+
+AlertDialog
+    Confirms restore and disconnect operations and warns about another backup.
+
+Toast
+    Shows short success and error messages.
+
+
+16. IMPORTANT RENT DESK BACKUP CLASSES
+======================================
+
+BackupModels.kt
+    Defines the backup data structure and Drive file/account response models.
+
+LocalBackupManager.kt
+    Reads Room data, builds backups, validates downloaded files, restores the
+    database, calculates checksums, and creates ZIP/CSV exports.
+
+GoogleDriveClient.kt
+    Sends Google Drive REST API requests to list, upload, download, and delete
+    files.
+
+DriveBackupPreferences.kt
+    Stores local backup connection information.
+
+SettingsFragment.kt
+    Coordinates the UI, Google authorization, backup, restore, export, progress,
+    warnings, and error handling.
+
+
+17. BACKUP DATA MODELS
+======================
+
+BackupEnvelope
+    Contains the SHA-256 checksum and the actual BackupData.
+
+BackupData
+    Contains metadata and all addresses, properties, tenant information, and
+    transactions.
+
+BackupRecordCounts
+    Provides record totals for the restore confirmation screen.
+
+DriveBackupFile
+    Represents a backup file returned by Google Drive, including its ID, name,
+    modification time, and size.
+
+DriveAccountInfo
+    Contains the authorized Google account's email address and display name.
+
+
+18. COMPLETE API FLOW
+=====================
+
+CONNECT:
+
+SettingsFragment
+  -> Google Authorization API
+  -> Google account/consent screen
+  -> temporary access token
+  -> Drive API about endpoint
+  -> verify rentdesk111@gmail.com
+  -> save local connection information
+
+BACKUP:
+
+SettingsFragment
+  -> Room APIs read all data in a transaction
+  -> Gson creates JSON
+  -> MessageDigest creates SHA-256 checksum
+  -> Drive API uploads JSON to appDataFolder
+  -> Drive API keeps the newest five backups
+
+RESTORE:
+
+SettingsFragment
+  -> Drive API lists backups
+  -> user selects one backup
+  -> Drive API downloads JSON
+  -> Gson parses JSON
+  -> SHA-256 and relationship validation
+  -> user confirms replacement
+  -> Room transaction replaces local data
+
+EXPORT:
+
+SettingsFragment
+  -> Room APIs read all data
+  -> CSV and JSON files are generated
+  -> ZIP API creates one archive
+  -> Drive API finds or creates RentDesk Exports
+  -> Drive API uploads the ZIP
+
+
+19. GOOGLE CLOUD REQUIREMENTS
+=============================
+
+The APIs work only when the Google Cloud project is configured correctly:
+
+- Google Drive API must be enabled.
+- The OAuth audience must allow the selected user.
+- rentdesk111@gmail.com must be added as a test user while in Testing mode.
+- An Android OAuth client must use package com.get.detail.rentdesk.
+- The OAuth client must contain the installed APK's signing SHA-1.
+
+Release APK SHA-1 currently installed on the test phone:
+
+21:65:06:F1:7E:BE:37:0D:FF:38:A9:52:0A:77:3A:56:DF:C6:48:F5
+
+Debug SHA-1 used by Android Studio debug builds:
+
+34:45:18:B9:EE:7B:4C:8B:00:F3:4D:FA:3A:3F:BE:0C:BF:72:83:EB
+
+
+20. SECURITY SUMMARY
+====================
+
+- Rent Desk never asks for or stores a Google password.
+- OAuth access tokens are used temporarily in memory.
+- Only the limited drive.appdata and drive.file scopes are requested.
+- SHA-256 protects integrity but does not encrypt the backup.
+- Hidden operational backups are less likely to be accidentally modified.
+- Readable ZIP exports are visible and may contain sensitive tenant, mobile,
+  and Aadhaar information.
+- The Google account should use a strong password and two-step verification.
+

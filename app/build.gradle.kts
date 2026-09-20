@@ -15,6 +15,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "DRIVE_BACKUP_ACCOUNT", "\"rentdesk111@gmail.com\"")
     }
 
     buildTypes {
@@ -34,7 +35,9 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
+
 }
 
 dependencies {
@@ -62,6 +65,7 @@ dependencies {
 
     // App lock biometric authentication
     implementation(libs.androidx.biometric)
+    implementation(libs.google.play.services.auth)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

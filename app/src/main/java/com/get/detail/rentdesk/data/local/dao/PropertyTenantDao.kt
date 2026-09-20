@@ -25,6 +25,9 @@ interface PropertyTenantDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProperty(property: PropertyTenantInfo)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertProperties(properties: List<PropertyTenantInfo>)
+
     @Update
     suspend fun updateProperty(property: PropertyTenantInfo)
 
@@ -33,4 +36,7 @@ interface PropertyTenantDao {
 
     @androidx.room.Delete
     suspend fun deleteProperties(properties: List<PropertyTenantInfo>)
+
+    @Query("DELETE FROM property_tenant_info")
+    suspend fun deleteAllProperties()
 }

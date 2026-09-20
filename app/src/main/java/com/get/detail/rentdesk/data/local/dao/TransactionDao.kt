@@ -22,6 +22,9 @@ interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: RecordTransaction)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertTransactions(transactions: List<RecordTransaction>)
+
     @Update
     suspend fun updateTransaction(transaction: RecordTransaction)
 
@@ -33,4 +36,7 @@ interface TransactionDao {
     
     @Query("SELECT EXISTS(SELECT 1 FROM record_transaction WHERE propertyId = :propertyId AND monthYear = :monthYear LIMIT 1)")
     suspend fun doesTransactionExist(propertyId: String, monthYear: String): Boolean
+
+    @Query("DELETE FROM record_transaction")
+    suspend fun deleteAllTransactions()
 }

@@ -1,0 +1,222 @@
+RENT DESK - GOOGLE DRIVE BACKUP IMPLEMENTATION
+================================================
+
+OVERVIEW
+--------
+
+We added a complete Google Drive backup and restore feature to Rent Desk.
+It creates manual snapshots of the local Room database and stores them in the
+Google Drive account rentdesk111@gmail.com.
+
+This is a backup system, not live synchronization. Data is transferred only
+when the user selects Back up now, Restore backup, or Export readable copy.
+
+
+FEATURES ADDED
+--------------
+
+The Settings screen now contains a Google Drive backup section with:
+
+- Connect Google Drive
+- Back up now
+- Restore backup
+- Export readable copy
+- Disconnect Drive
+- Connected Google account information
+- Backup user/mobile number
+- Last successful backup time
+- Progress and error messages
+
+
+CONNECTING GOOGLE DRIVE
+-----------------------
+
+When Connect Google Drive is selected:
+
+1. Google Play Services opens the secure account-selection and permission
+   screen.
+2. Rent Desk requests permission to manage only the Drive files used by the
+   application.
+3. Google provides a temporary access token.
+4. Rent Desk reads the selected account's email address.
+5. The connection is accepted only if the selected account is
+   rentdesk111@gmail.com.
+
+The application does not collect the Google password and does not permanently
+store the Google access token. It stores only basic connection information,
+such as the connected email address and the last backup details.
+
+The account must be added as a test user in the correct Google Cloud OAuth
+project while the application remains in Testing mode.
+
+
+CREATING A BACKUP
+-----------------
+
+When Back up now is selected:
+
+1. Rent Desk reads all addresses, properties, tenant information, and payment
+   transactions from the Room database.
+2. The information is read inside one database transaction so that every part
+   of the backup represents the database at the same moment.
+3. Rent Desk adds the backup date and time, user mobile number, source device,
+   application version, backup format version, and record counts.
+4. The information is converted into JSON format.
+5. A SHA-256 checksum is calculated to help detect damaged or modified data.
+6. The JSON backup is uploaded to Google Drive's hidden appDataFolder.
+
+The hidden folder helps prevent users from accidentally editing, renaming, or
+deleting an operational backup.
+
+Backup filenames look similar to:
+
+rentdesk_backup_20260920_102500_98xxxxxx42.json
+
+The mobile number is partly hidden in the filename for privacy. Rent Desk keeps
+the latest five backups and automatically removes older backups.
+
+
+PROTECTION WHEN USING MULTIPLE DEVICES
+--------------------------------------
+
+Before uploading, Rent Desk checks the newest backup on Google Drive. If it
+finds a backup that the current device has not previously recorded, it warns
+that another device or session may have created a newer backup.
+
+The user can either upload anyway or cancel and review the existing backup.
+This reduces the chance of unknowingly placing older data ahead of newer data.
+
+
+RESTORING A BACKUP
+------------------
+
+When Restore backup is selected:
+
+1. Rent Desk lists the available backups, newest first.
+2. The user chooses a backup.
+3. The backup is downloaded from Google Drive.
+4. Rent Desk validates it before changing the local database.
+
+Validation includes:
+
+- Checking that the backup format version is supported
+- Recalculating and checking the SHA-256 checksum
+- Ensuring that every transaction belongs to an existing property
+- Ensuring that property and address relationships are valid
+
+Before restoring, the application displays the backup date, user mobile
+number, source device, and the number of addresses, properties, and
+transactions that will be restored.
+
+After confirmation, the existing local data is replaced by the selected
+backup. The replacement is performed inside one Room transaction. This means
+either the complete restore succeeds or the database changes are rolled back.
+
+
+READABLE EXPORT
+---------------
+
+The Export readable copy option creates a ZIP file in the visible Google Drive
+folder named:
+
+RentDesk Exports
+
+The ZIP contains:
+
+- addresses.csv
+- properties.csv
+- tenants.csv
+- transactions.csv
+- complete_backup.json
+- metadata.json
+
+The CSV files can be opened with Microsoft Excel or Google Sheets. The complete
+JSON file can be used for technical inspection or future data recovery.
+
+CSV values are safely quoted. Values beginning with =, +, -, or @ are also
+protected against accidental spreadsheet formula execution.
+
+
+TECHNOLOGIES USED AND WHY
+-------------------------
+
+Google Play Services Authorization
+    Opens Google's secure account-selection and permission screens.
+
+Google Drive API v3
+    Uploads, lists, downloads, and removes backup files.
+
+drive.appdata permission
+    Stores restorable backups in the application's hidden Drive area.
+
+drive.file permission
+    Creates readable ZIP exports in the visible RentDesk Exports folder.
+
+Room database
+    Stores the application's addresses, properties, tenants, and transactions.
+
+Room transactions
+    Keeps backup reads and database restores complete and consistent.
+
+Gson
+    Converts Kotlin database objects to and from JSON.
+
+SHA-256
+    Detects damaged or modified backup data before restoration.
+
+Kotlin coroutines
+    Runs database and network operations away from the main user-interface
+    thread so the application remains responsive.
+
+SharedPreferences
+    Saves the connected email address and last-backup information locally.
+
+ZipOutputStream
+    Creates the readable ZIP export.
+
+Material Components
+    Provides the backup card, buttons, progress indicator, and dialogs.
+
+BuildConfig
+    Keeps the required Google account in one configured location.
+
+Direct HTTPS requests to the Drive REST API
+    Communicates with Google Drive without adding a larger Drive client library.
+
+
+APPLICATION AND GOOGLE CLOUD CONFIGURATION
+------------------------------------------
+
+The Android application now includes:
+
+- Internet permission
+- Google Play Services Auth dependency
+- Required backup account configuration for rentdesk111@gmail.com
+- Google Drive setup instructions in README.md
+- Room DAO operations for bulk reading, inserting, and deleting records
+
+The Google Cloud project must have:
+
+- Google Drive API enabled
+- An Android OAuth client for package com.get.detail.rentdesk
+- The SHA-1 fingerprint of every certificate used to sign an installed build
+- rentdesk111@gmail.com registered as a test user while the app is in Testing
+  mode
+
+The release APK currently installed on the test phone uses this SHA-1:
+
+21:65:06:F1:7E:BE:37:0D:FF:38:A9:52:0A:77:3A:56:DF:C6:48:F5
+
+
+IMPORTANT SECURITY NOTE
+-----------------------
+
+The restorable JSON backup is stored in Google Drive's hidden application area,
+but Rent Desk does not currently add another layer of encryption to the backup
+contents.
+
+The readable ZIP is intentionally visible and contains tenant information,
+including mobile and Aadhaar details. Anyone who can access the Google Drive
+account or download the ZIP may be able to read that information. The Google
+account should therefore use a strong password and two-step verification.
+

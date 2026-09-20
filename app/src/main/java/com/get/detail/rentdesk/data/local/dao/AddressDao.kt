@@ -22,6 +22,15 @@ interface AddressDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAddress(address: Address)
+
+    @Query("SELECT * FROM addresses")
+    suspend fun getAllAddressesList(): List<Address>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAddresses(addresses: List<Address>)
+
+    @Query("DELETE FROM addresses")
+    suspend fun deleteAllAddresses()
 }
 
 data class AddressWithPropertyCount(

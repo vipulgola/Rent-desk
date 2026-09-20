@@ -66,6 +66,7 @@ dependencies {
     // App lock biometric authentication
     implementation(libs.androidx.biometric)
     implementation(libs.google.play.services.auth)
+    implementation(libs.androidx.work.runtime.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,10 +1,10 @@
 package com.get.detail.rentdesk.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.ColumnInfo
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.get.detail.rentdesk.utils.YearMonth
 
 @Entity(
     tableName = "record_transaction",
@@ -18,15 +18,19 @@ import com.get.detail.rentdesk.utils.YearMonth
     ],
     indices = [
         Index(value = ["propertyId"]),
-        Index(value = ["monthYear"])
+        Index(value = ["paymentDateUtc"])
     ]
 )
 data class RecordTransaction(
     @PrimaryKey
     val transactionId: String,
     val propertyId: String,
-    val monthYear: YearMonth,
+    @ColumnInfo(defaultValue = "0")
+    val paymentDateUtc: Long,
     val reading: Int,
-    val balanceAmount: Int,
-    val amountPaid: Int
+    val amountPaid: Double,
+    @ColumnInfo(defaultValue = "0")
+    val createdAtUtc: Long = System.currentTimeMillis(),
+    @ColumnInfo(defaultValue = "0")
+    val modifiedAtUtc: Long = createdAtUtc
 )

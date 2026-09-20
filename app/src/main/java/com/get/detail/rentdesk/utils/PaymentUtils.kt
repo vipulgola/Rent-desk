@@ -8,7 +8,11 @@ import com.get.detail.rentdesk.domain.usecase.RentPaymentStatus
 
 object PaymentUtils {
 
-    fun updatePaymentStatusUI(textView: TextView, status: RentPaymentStatus) {
+    fun updatePaymentStatusUI(
+        textView: TextView,
+        status: RentPaymentStatus,
+        customText: CharSequence? = null
+    ) {
         val context = textView.context
         val (textColorRes, bgColorRes, statusTextRes) = when (status) {
             RentPaymentStatus.PAID -> Triple(
@@ -28,7 +32,7 @@ object PaymentUtils {
             )
         }
 
-        textView.setText(statusTextRes)
+        textView.text = customText ?: context.getString(statusTextRes)
         textView.setTextColor(ContextCompat.getColor(context, textColorRes))
 
         val shape = GradientDrawable().apply {

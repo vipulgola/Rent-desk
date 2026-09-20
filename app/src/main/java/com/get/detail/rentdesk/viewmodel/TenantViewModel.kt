@@ -30,11 +30,22 @@ class TenantViewModel(private val repository: RentRepository) : ViewModel() {
         _property.value = p
     }
 
-    fun updatePropertyWithTenant(propertyId: String, tenantInfo: TenantInfo) {
+    fun updatePropertyWithTenant(
+        propertyId: String,
+        tenantInfo: TenantInfo,
+        monthlyRent: Int,
+        electricityPricePerUnit: Double,
+        meterReading: Int
+    ) {
         viewModelScope.launch {
             val property = repository.getPropertyById(propertyId)
             property?.let {
-                val updatedProperty = it.copy(tenantInfo = tenantInfo)
+                val updatedProperty = it.copy(
+                    tenantInfo = tenantInfo,
+                    monthlyRent = monthlyRent,
+                    electricityPricePerUnit = electricityPricePerUnit,
+                    meterReading = meterReading
+                )
                 repository.updateProperty(updatedProperty)
                 navigateToTransactions.postValue(propertyId)
             }

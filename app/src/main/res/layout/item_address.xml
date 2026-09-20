@@ -42,7 +42,7 @@
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
             android:textColor="@color/text_primary"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_edit_address"
             app:layout_constraintStart_toEndOf="@id/iv_address_icon"
             app:layout_constraintTop_toTopOf="@id/iv_address_icon" />
 
@@ -55,9 +55,23 @@
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             android:textColor="@color/text_secondary"
             app:layout_constraintBottom_toBottomOf="@id/iv_address_icon"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_edit_address"
             app:layout_constraintStart_toEndOf="@id/iv_address_icon"
             app:layout_constraintTop_toBottomOf="@id/tv_address_title" />
+
+        <ImageButton
+            android:id="@+id/btn_edit_address"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/edit_address"
+            android:padding="8dp"
+            android:src="@drawable/ic_edit_24"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/text_secondary" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

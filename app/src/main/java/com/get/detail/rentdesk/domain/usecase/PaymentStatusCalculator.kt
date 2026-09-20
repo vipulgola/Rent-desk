@@ -2,6 +2,7 @@ package com.get.detail.rentdesk.domain.usecase
 
 import com.get.detail.rentdesk.data.local.entity.PropertyTenantInfo
 import com.get.detail.rentdesk.data.local.entity.RecordTransaction
+import com.get.detail.rentdesk.utils.PaymentDateUtils
 import com.get.detail.rentdesk.utils.YearMonth
 import java.util.Calendar
 
@@ -17,7 +18,26 @@ object PaymentStatusCalculator {
         transactions: List<RecordTransaction>,
         calendar: Calendar = Calendar.getInstance()
     ): RentPaymentStatus {
-        val tenant = property.tenantInfo ?: return RentPaymentStatus.VACANT
+        if (property.tenantInfo == null) return RentPaymentStatus.VACANT
+        val billingMonth = billingMonth(property, calendar) ?: return RentPaymentStatus.PAID
+
+        val isFullyPaid = transactions.any { transaction ->
+            transaction.propertyId == property.propertyId &&
+                PaymentDateUtils.toYearMonth(transaction.paymentDateUtc) == billingMonth &&
+                transaction.amountPaid > 0
+        }
+        return if (isFullyPaid) {
+            RentPaymentStatus.PAID
+        } else {
+            RentPaymentStatus.DUE
+        }
+    }
+
+    fun billingMonth(
+        property: PropertyTenantInfo,
+        calendar: Calendar = Calendar.getInstance()
+    ): YearMonth? {
+        val tenant = property.tenantInfo ?: return null
         val currentYear = calendar.get(Calendar.YEAR)
         val currentMonthNumber = calendar.get(Calendar.MONTH) + 1
         val currentMonth = YearMonth(currentYear, currentMonthNumber)
@@ -25,24 +45,16 @@ object PaymentStatusCalculator {
         if (currentMonth.year < joiningMonth.year ||
             (currentMonth.year == joiningMonth.year && currentMonth.month < joiningMonth.month)
         ) {
-            return RentPaymentStatus.PAID
+            return null
         }
 
         val storedJoiningDay = tenant.joiningDayOfMonth.takeIf { it in 1..31 } ?: 1
         val dueDay = minOf(storedJoiningDay, calendar.getActualMaximum(Calendar.DAY_OF_MONTH))
-        val billingMonth = if (calendar.get(Calendar.DAY_OF_MONTH) >= dueDay) {
+        return if (calendar.get(Calendar.DAY_OF_MONTH) >= dueDay) {
             currentMonth
         } else {
             previousMonth(currentYear, currentMonthNumber)
         }
-
-        val isFullyPaid = transactions.any { transaction ->
-            transaction.propertyId == property.propertyId &&
-                transaction.monthYear == billingMonth &&
-                transaction.amountPaid > 0 &&
-                transaction.balanceAmount <= 0
-        }
-        return if (isFullyPaid) RentPaymentStatus.PAID else RentPaymentStatus.DUE
     }
 
     private fun previousMonth(year: Int, month: Int): YearMonth = if (month == 1) {

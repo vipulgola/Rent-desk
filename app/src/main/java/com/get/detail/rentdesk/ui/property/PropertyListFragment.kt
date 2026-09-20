@@ -41,7 +41,7 @@ class PropertyListFragment : Fragment() {
 
     private val viewModel: PropertyViewModel by viewModels {
         val database = AppDatabase.getDatabase(requireContext())
-        val repository = RentRepository(database.addressDao(), database.propertyTenantDao(), database.transactionDao())
+        val repository = RentRepository(requireContext(), database.addressDao(), database.propertyTenantDao(), database.transactionDao())
         PropertyViewModelFactory(repository)
     }
 
@@ -95,6 +95,7 @@ class PropertyListFragment : Fragment() {
                     findNavController().navigate(R.id.action_propertyListFragment_to_transactionListFragment, bundle)
                 }
             },
+            onEdit = { property -> showPropertyDialog(property) },
             onSelectionChanged = { isSelectionMode ->
                 requireActivity().invalidateOptionsMenu()
                 binding.fabAddProperty.visibility = if (isSelectionMode) View.GONE else View.VISIBLE
@@ -127,7 +128,7 @@ class PropertyListFragment : Fragment() {
         }
 
         binding.fabAddProperty.setOnClickListener {
-            showAddPropertyDialog()
+            showPropertyDialog()
         }
     }
 
@@ -198,10 +199,12 @@ class PropertyListFragment : Fragment() {
             .show()
     }
 
-    private fun showAddPropertyDialog() {
+    private fun showPropertyDialog(existing: PropertyTenantInfo? = null) {
         val context = requireContext()
         val editText = EditText(context)
-        editText.hint = "Property Name"
+        editText.hint = getString(R.string.property_name)
+        editText.setText(existing?.entityName.orEmpty())
+        editText.setSelection(editText.text.length)
         
         val container = FrameLayout(context)
         val params = FrameLayout.LayoutParams(
@@ -215,21 +218,25 @@ class PropertyListFragment : Fragment() {
         container.addView(editText)
         
         AlertDialog.Builder(context)
-            .setTitle("Add Property")
+            .setTitle(if (existing == null) R.string.add_property else R.string.edit_property_name)
             .setView(container)
-            .setPositiveButton("Save") { _, _ ->
-                val name = editText.text.toString()
+            .setPositiveButton(R.string.save) { _, _ ->
+                val name = editText.text.toString().trim()
                 if (name.isNotBlank()) {
-                    val addressId = arguments?.getString("addressId")
-                    val property = PropertyTenantInfo(
-                        propertyId = UUID.randomUUID().toString(),
-                        entityName = name,
-                        addressId = addressId
-                    )
-                    viewModel.insertProperty(property)
+                    if (existing == null) {
+                        val addressId = arguments?.getString("addressId")
+                        val property = PropertyTenantInfo(
+                            propertyId = UUID.randomUUID().toString(),
+                            entityName = name,
+                            addressId = addressId
+                        )
+                        viewModel.insertProperty(property)
+                    } else {
+                        viewModel.updateProperty(existing.copy(entityName = name))
+                    }
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 

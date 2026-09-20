@@ -15,6 +15,10 @@ class AddressViewModel(private val repository: RentRepository) : ViewModel() {
     fun insertAddress(address: Address) = viewModelScope.launch {
         repository.insertAddress(address)
     }
+
+    fun updateAddressName(id: String, name: String) = viewModelScope.launch {
+        repository.updateAddressName(id, name)
+    }
 }
 
 class AddressViewModelFactory(private val repository: RentRepository) : ViewModelProvider.Factory {

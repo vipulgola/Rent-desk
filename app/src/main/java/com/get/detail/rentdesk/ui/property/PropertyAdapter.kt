@@ -9,11 +9,15 @@ import com.get.detail.rentdesk.data.local.entity.PropertyTenantInfo
 import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 import com.get.detail.rentdesk.databinding.ItemPropertyBinding
 import com.get.detail.rentdesk.domain.usecase.PaymentStatusCalculator
+import com.get.detail.rentdesk.domain.usecase.RentPaymentStatus
 import com.get.detail.rentdesk.utils.PaymentUtils
 import android.view.View
+import java.text.DateFormatSymbols
+import java.util.Locale
 
 class PropertyAdapter(
     private val onClick: (PropertyTenantInfo) -> Unit,
+    private val onEdit: (PropertyTenantInfo) -> Unit,
     private val onSelectionChanged: (Boolean) -> Unit,
     private var propertyList: List<PropertyTenantInfo> = listOf(),
     private var transactionList: List<RecordTransaction> = listOf()
@@ -55,10 +59,21 @@ class PropertyAdapter(
                 ?: binding.root.context.getString(R.string.no_tenant)
             
             val paymentStatus = PaymentStatusCalculator.currentStatus(property, transactionList)
-            PaymentUtils.updatePaymentStatusUI(binding.tvPaymentStatus, paymentStatus)
+            val dueText = if (paymentStatus == RentPaymentStatus.DUE) {
+                PaymentStatusCalculator.billingMonth(property)?.let { billingMonth ->
+                    val monthName = DateFormatSymbols.getInstance(Locale.getDefault())
+                        .months[billingMonth.month - 1]
+                    binding.root.context.getString(R.string.payment_due_for_month, monthName)
+                }
+            } else {
+                null
+            }
+            PaymentUtils.updatePaymentStatusUI(binding.tvPaymentStatus, paymentStatus, dueText)
 
             binding.cbPropertySelected.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
             binding.cbPropertySelected.isChecked = selectedItems.contains(property)
+            binding.btnEditProperty.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
+            binding.btnEditProperty.setOnClickListener { onEdit(property) }
             
             binding.root.setOnClickListener {
                 if (isSelectionMode) {

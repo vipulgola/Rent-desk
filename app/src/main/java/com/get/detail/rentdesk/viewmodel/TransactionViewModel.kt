@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.get.detail.rentdesk.data.local.entity.RecordTransaction
+import com.get.detail.rentdesk.data.local.entity.PropertyTenantInfo
 import com.get.detail.rentdesk.data.repository.RentRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class TransactionViewModel(private val repository: RentRepository) : ViewModel() {
@@ -14,8 +16,31 @@ class TransactionViewModel(private val repository: RentRepository) : ViewModel()
         return repository.getTransactionsForProperty(propertyId)
     }
 
+    fun getPropertyFlow(propertyId: String): Flow<PropertyTenantInfo?> =
+        repository.allProperties.map { properties ->
+            properties.firstOrNull { it.propertyId == propertyId }
+        }
+
     fun insertTransaction(transaction: RecordTransaction) = viewModelScope.launch {
         repository.insertTransaction(transaction)
+    }
+
+    suspend fun getProperty(propertyId: String): PropertyTenantInfo? =
+        repository.getPropertyById(propertyId)
+
+    fun recordPayment(
+        transaction: RecordTransaction,
+        meterReading: Int,
+        balanceAmount: Double
+    ) = viewModelScope.launch {
+        repository.recordPayment(transaction, meterReading, balanceAmount)
+    }
+
+    fun updateRecordedPayment(
+        transaction: RecordTransaction,
+        balanceDelta: Double
+    ) = viewModelScope.launch {
+        repository.updateRecordedPayment(transaction, balanceDelta)
     }
 
     fun updateTransaction(transaction: RecordTransaction) = viewModelScope.launch {

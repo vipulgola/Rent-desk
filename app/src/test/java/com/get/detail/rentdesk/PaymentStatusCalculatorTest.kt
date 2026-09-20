@@ -5,6 +5,7 @@ import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 import com.get.detail.rentdesk.domain.model.TenantInfo
 import com.get.detail.rentdesk.domain.usecase.PaymentStatusCalculator
 import com.get.detail.rentdesk.domain.usecase.RentPaymentStatus
+import com.get.detail.rentdesk.utils.PaymentDateUtils
 import com.get.detail.rentdesk.utils.YearMonth
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -27,6 +28,10 @@ class PaymentStatusCalculatorTest {
     @Test
     fun beforeJoiningDay_withoutPreviousCyclePayment_isDue() {
         assertEquals(
+            YearMonth(2026, 8),
+            PaymentStatusCalculator.billingMonth(property, date(2026, 9, 9))
+        )
+        assertEquals(
             RentPaymentStatus.DUE,
             PaymentStatusCalculator.currentStatus(property, emptyList(), date(2026, 9, 9))
         )
@@ -45,6 +50,10 @@ class PaymentStatusCalculatorTest {
     @Test
     fun onJoiningDay_isDue() {
         assertEquals(
+            YearMonth(2026, 9),
+            PaymentStatusCalculator.billingMonth(property, date(2026, 9, 10))
+        )
+        assertEquals(
             RentPaymentStatus.DUE,
             PaymentStatusCalculator.currentStatus(property, emptyList(), date(2026, 9, 10))
         )
@@ -57,6 +66,20 @@ class PaymentStatusCalculatorTest {
         assertEquals(
             RentPaymentStatus.PAID,
             PaymentStatusCalculator.currentStatus(property, listOf(transaction), date(2026, 9, 15))
+        )
+    }
+
+    @Test
+    fun paymentWithRemainingPropertyBalance_isDue() {
+        val transaction = paidTransaction(month = 9)
+
+        assertEquals(
+            RentPaymentStatus.DUE,
+            PaymentStatusCalculator.currentStatus(
+                property.copy(balanceAmount = 250.0),
+                listOf(transaction),
+                date(2026, 9, 15)
+            )
         )
     }
 
@@ -88,10 +111,9 @@ class PaymentStatusCalculatorTest {
     private fun paidTransaction(month: Int) = RecordTransaction(
         transactionId = "transaction-$month",
         propertyId = property.propertyId,
-        monthYear = YearMonth(2026, month),
+        paymentDateUtc = PaymentDateUtils.fromDateParts(2026, month, 10),
         reading = 0,
-        balanceAmount = 0,
-        amountPaid = 1000
+        amountPaid = 1000.0
     )
 
     private fun date(year: Int, month: Int, day: Int): Calendar =

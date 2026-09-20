@@ -86,19 +86,9 @@
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             android:textColor="@color/status_paid"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/tv_balance_amount"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/iv_transaction_icon" />
-
-        <TextView
-            android:id="@+id/tv_balance_amount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textColor="@color/status_due"
-            android:textStyle="bold"
-            app:layout_constraintBaseline_toBaselineOf="@id/tv_amount_paid"
-            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

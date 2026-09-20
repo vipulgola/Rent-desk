@@ -23,6 +23,9 @@ interface AddressDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAddress(address: Address)
 
+    @Query("UPDATE addresses SET address = :name, modifiedAtUtc = :modifiedAtUtc WHERE dataUUID = :id")
+    suspend fun updateAddressName(id: String, name: String, modifiedAtUtc: Long)
+
     @Query("SELECT * FROM addresses")
     suspend fun getAllAddressesList(): List<Address>
 

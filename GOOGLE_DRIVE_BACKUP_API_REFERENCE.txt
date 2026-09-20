@@ -8,6 +8,20 @@ This document explains the important APIs used by the Rent Desk Google Drive
 backup feature. It describes what each API does, where it is used, and why it
 was selected.
 
+The feature also uses AndroidX WorkManager to queue automatic backups after
+local database changes. Work is delayed for 45 seconds to group rapid edits and
+uses a CONNECTED network constraint. Creation and modification timestamps are
+stored on address, property, and transaction rows as UTC epoch milliseconds.
+Before automatic upload, the latest Drive snapshot is downloaded and records
+with matching IDs are merged by their modification timestamps.
+
+Property backup entries include monthlyRent as an integer,
+electricityPricePerUnit as a decimal value, meterReading as an integer, and
+balanceAmount as a decimal value. Transactions include paymentDateUtc as an
+integer UTC timestamp, reading, and amountPaid. The dd/mm/yyyy value is only a UI
+format. Room database version 4 stores these fields;
+the 3-to-4 migration moves the latest old transaction balance onto its property.
+
 
 1. GOOGLE PLAY SERVICES AUTHORIZATION API
 =========================================
@@ -701,4 +715,3 @@ Debug SHA-1 used by Android Studio debug builds:
 - Readable ZIP exports are visible and may contain sensitive tenant, mobile,
   and Aadhaar information.
 - The Google account should use a strong password and two-step verification.
-

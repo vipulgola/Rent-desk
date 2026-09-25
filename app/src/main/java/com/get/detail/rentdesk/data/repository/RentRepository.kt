@@ -78,28 +78,18 @@ class RentRepository(
         autoBackupScheduler.databaseChanged()
     }
 
-    suspend fun recordPayment(
-        transaction: RecordTransaction,
-        meterReading: Int,
-        balanceAmount: Double
-    ) {
+    suspend fun recordPayment(transaction: RecordTransaction) {
         transactionDao.recordPayment(
             transaction = transaction,
-            meterReading = meterReading,
-            balanceAmount = balanceAmount,
             modifiedAtUtc = System.currentTimeMillis()
         )
         autoBackupScheduler.databaseChanged()
     }
 
-    suspend fun updateRecordedPayment(
-        transaction: RecordTransaction,
-        balanceDelta: Double
-    ) {
+    suspend fun updateRecordedPayment(transaction: RecordTransaction) {
         val modifiedAt = System.currentTimeMillis()
         transactionDao.updateRecordedPayment(
-            transaction.copy(modifiedAtUtc = modifiedAt),
-            balanceDelta,
+            transaction,
             modifiedAt
         )
         autoBackupScheduler.databaseChanged()
@@ -110,10 +100,16 @@ class RentRepository(
         autoBackupScheduler.databaseChanged()
     }
 
-    suspend fun deleteTransactions(transactions: List<RecordTransaction>) {
+    suspend fun deleteTransactions(
+        transactions: List<RecordTransaction>,
+        manualBalance: Double? = null,
+        manualReading: Int? = null
+    ) {
         transactionDao.deleteTransactionsAndRestoreBalance(
             transactions,
-            System.currentTimeMillis()
+            System.currentTimeMillis(),
+            manualBalance,
+            manualReading
         )
         autoBackupScheduler.databaseChanged()
     }

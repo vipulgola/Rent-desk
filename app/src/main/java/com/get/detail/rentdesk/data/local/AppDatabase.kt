@@ -17,7 +17,7 @@ import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 
 @Database(
     entities = [PropertyTenantInfo::class, RecordTransaction::class, Address::class],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -37,13 +37,23 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "rent_desk_database"
                 )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
+    }
+}
+
+val MIGRATION_4_5 = object : Migration(4, 5) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `record_transaction` ADD COLUMN `previousBalance` REAL")
+        db.execSQL("ALTER TABLE `record_transaction` ADD COLUMN `previousReading` INTEGER")
+        db.execSQL("ALTER TABLE `record_transaction` ADD COLUMN `rentCharged` REAL")
+        db.execSQL("ALTER TABLE `record_transaction` ADD COLUMN `electricityRateCharged` REAL")
+        db.execSQL("ALTER TABLE `record_transaction` ADD COLUMN `isDeleted` INTEGER NOT NULL DEFAULT 0")
     }
 }
 

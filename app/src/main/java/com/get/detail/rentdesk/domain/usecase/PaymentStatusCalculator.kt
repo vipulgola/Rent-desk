@@ -23,6 +23,7 @@ object PaymentStatusCalculator {
 
         val isFullyPaid = transactions.any { transaction ->
             transaction.propertyId == property.propertyId &&
+                !transaction.isDeleted &&
                 PaymentDateUtils.toYearMonth(transaction.paymentDateUtc) == billingMonth &&
                 transaction.amountPaid > 0
         }

@@ -2,6 +2,7 @@ package com.get.detail.rentdesk.ui.transaction
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -9,6 +10,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -29,6 +32,7 @@ import com.get.detail.rentdesk.databinding.DialogTransactionBinding
 import com.get.detail.rentdesk.databinding.FragmentTransactionListBinding
 import com.get.detail.rentdesk.domain.usecase.RentBreakdown
 import com.get.detail.rentdesk.domain.usecase.RentCalculator
+import com.get.detail.rentdesk.domain.usecase.LegacyTransactionHistoryException
 import com.get.detail.rentdesk.utils.PaymentDateUtils
 import com.get.detail.rentdesk.viewmodel.TransactionViewModel
 import com.get.detail.rentdesk.viewmodel.TransactionViewModelFactory
@@ -186,20 +190,86 @@ class TransactionListFragment : Fragment() {
 
     private fun showDeleteConfirmationDialog() {
         val selectedCount = adapter.selectedItems.size
+        val selected = adapter.getSelectedTransactions()
         AlertDialog.Builder(requireContext())
             .setTitle("Delete Transactions")
             .setMessage("Are you sure you want to delete $selectedCount selected transaction(s)?")
             .setPositiveButton("Delete") { _, _ ->
-                viewModel.deleteTransactions(adapter.getSelectedTransactions())
-                adapter.isSelectionMode = false
-                Toast.makeText(
-                    requireContext(),
-                    "$selectedCount transactions deleted",
-                    Toast.LENGTH_SHORT
-                ).show()
+                deleteSelectedTransactions(selected)
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    private fun deleteSelectedTransactions(
+        selected: List<RecordTransaction>,
+        manualBalance: Double? = null,
+        manualReading: Int? = null
+    ) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                viewModel.deleteTransactions(selected, manualBalance, manualReading)
+                adapter.isSelectionMode = false
+                Toast.makeText(
+                    requireContext(),
+                    "${selected.size} transactions deleted",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } catch (_: LegacyTransactionHistoryException) {
+                showLegacyDeletionDialog(selected)
+            } catch (error: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    error.message ?: "Could not delete transactions",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    }
+
+    private fun showLegacyDeletionDialog(selected: List<RecordTransaction>) {
+        val balanceInput = EditText(requireContext()).apply {
+            hint = "Correct balance after deletion"
+            inputType = InputType.TYPE_CLASS_NUMBER or
+                InputType.TYPE_NUMBER_FLAG_DECIMAL or InputType.TYPE_NUMBER_FLAG_SIGNED
+        }
+        val readingInput = EditText(requireContext()).apply {
+            hint = "Correct meter reading after deletion"
+            inputType = InputType.TYPE_CLASS_NUMBER
+        }
+        val fields = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            val padding = (24 * resources.displayMetrics.density).toInt()
+            setPadding(padding, 0, padding, 0)
+            addView(balanceInput)
+            addView(readingInput)
+        }
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Older transaction")
+            .setMessage(
+                "This payment was saved before bill details were recorded. " +
+                    "Enter the balance and meter reading that should remain after deletion."
+            )
+            .setView(fields)
+            .setPositiveButton("Delete and update", null)
+            .setNegativeButton(R.string.cancel, null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                val balance = balanceInput.text.toString().trim()
+                    .replace(',', '.').toDoubleOrNull()
+                val reading = readingInput.text.toString().trim().toIntOrNull()
+                if (balance == null || !balance.isFinite()) {
+                    balanceInput.error = "Enter a valid balance"
+                } else if (reading == null || reading < 0) {
+                    readingInput.error = "Enter a valid meter reading"
+                } else {
+                    dialog.dismiss()
+                    deleteSelectedTransactions(selected, balance, reading)
+                }
+            }
+        }
+        dialog.show()
     }
 
     private fun showNewTransactionDialog(property: PropertyTenantInfo) {
@@ -288,15 +358,18 @@ class TransactionListFragment : Fragment() {
                     reading = currentReading,
                     amountPaid = amountReceived
                 )
-                viewModel.recordPayment(
-                    transaction = transaction,
-                    meterReading = currentReading,
-                    balanceAmount = RentCalculator.remainingBalance(
-                        breakdown.totalAmount,
-                        amountReceived
-                    )
-                )
-                dialog.dismiss()
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        viewModel.recordPayment(transaction)
+                        dialog.dismiss()
+                    } catch (error: Exception) {
+                        Toast.makeText(
+                            requireContext(),
+                            error.message ?: "Could not save payment",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
             }
         }
         dialog.show()
@@ -349,11 +422,18 @@ class TransactionListFragment : Fragment() {
                         paymentDateUtc = paymentDateUtc,
                         amountPaid = amountReceived
                     )
-                    viewModel.updateRecordedPayment(
-                        transaction = updated,
-                        balanceDelta = transaction.amountPaid - amountReceived
-                    )
-                    dialog.dismiss()
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        try {
+                            viewModel.updateRecordedPayment(updated)
+                            dialog.dismiss()
+                        } catch (error: Exception) {
+                            Toast.makeText(
+                                requireContext(),
+                                error.message ?: "Could not update payment",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                 }
             }
             dialog.show()

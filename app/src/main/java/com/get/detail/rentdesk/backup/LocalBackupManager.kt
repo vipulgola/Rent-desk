@@ -32,7 +32,7 @@ class LocalBackupManager(context: Context) {
                 appVersion = BuildConfig.VERSION_NAME,
                 addresses = database.addressDao().getAllAddressesList(),
                 properties = database.propertyTenantDao().getAllPropertiesList(),
-                transactions = database.transactionDao().getAllTransactions()
+                transactions = database.transactionDao().getAllTransactionRecords()
             )
         }
         return createEnvelope(data)
@@ -286,8 +286,8 @@ class LocalBackupManager(context: Context) {
     }
 
     private fun transactionsCsv(backup: BackupEnvelope): String = buildString {
-        appendLine("transaction_id,property_id,payment_date,reading,amount_received,created_at_utc,modified_at_utc")
-        backup.data.transactions.forEach {
+        appendLine("transaction_id,property_id,payment_date,reading,amount_received,previous_balance,previous_reading,rent_charged,electricity_rate,created_at_utc,modified_at_utc")
+        backup.data.transactions.filterNot { it.isDeleted }.forEach {
             appendLine(
                 csvRow(
                     it.transactionId,
@@ -295,6 +295,10 @@ class LocalBackupManager(context: Context) {
                     PaymentDateUtils.format(it.paymentDateUtc),
                     it.reading.toString(),
                     it.amountPaid.toString(),
+                    it.previousBalance?.toString().orEmpty(),
+                    it.previousReading?.toString().orEmpty(),
+                    it.rentCharged?.toString().orEmpty(),
+                    it.electricityRateCharged?.toString().orEmpty(),
                     formatUtcTimestamp(it.createdAtUtc),
                     formatUtcTimestamp(it.modifiedAtUtc)
                 )
@@ -354,6 +358,6 @@ class LocalBackupManager(context: Context) {
         .joinToString("") { "%02x".format(it) }
 
     companion object {
-        const val SCHEMA_VERSION = 4
+        const val SCHEMA_VERSION = 5
     }
 }

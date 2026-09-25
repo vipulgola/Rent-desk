@@ -20,7 +20,11 @@ data class BackupData(
     val transactions: List<RecordTransaction>
 ) {
     val recordCounts: BackupRecordCounts
-        get() = BackupRecordCounts(addresses.size, properties.size, transactions.size)
+        get() = BackupRecordCounts(
+            addresses.size,
+            properties.size,
+            transactions.count { !it.isDeleted }
+        )
 }
 
 data class BackupRecordCounts(

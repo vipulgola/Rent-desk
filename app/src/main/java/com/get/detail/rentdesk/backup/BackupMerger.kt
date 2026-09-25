@@ -41,7 +41,14 @@ object BackupMerger {
         remote,
         RecordTransaction::transactionId
     ) { localItem, remoteItem ->
-        newer(localItem.modifiedAtUtc, remoteItem.modifiedAtUtc, localItem, remoteItem).copy(
+        val winner = when {
+            localItem.modifiedAtUtc > remoteItem.modifiedAtUtc -> localItem
+            remoteItem.modifiedAtUtc > localItem.modifiedAtUtc -> remoteItem
+            localItem.isDeleted -> localItem
+            remoteItem.isDeleted -> remoteItem
+            else -> localItem
+        }
+        winner.copy(
             createdAtUtc = earliest(localItem.createdAtUtc, remoteItem.createdAtUtc)
         )
     }

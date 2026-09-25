@@ -29,6 +29,12 @@ data class RecordTransaction(
     val paymentDateUtc: Long,
     val reading: Int,
     val amountPaid: Double,
+    val previousBalance: Double? = null,
+    val previousReading: Int? = null,
+    val rentCharged: Double? = null,
+    val electricityRateCharged: Double? = null,
+    @ColumnInfo(defaultValue = "0")
+    val isDeleted: Boolean = false,
     @ColumnInfo(defaultValue = "0")
     val createdAtUtc: Long = System.currentTimeMillis(),
     @ColumnInfo(defaultValue = "0")

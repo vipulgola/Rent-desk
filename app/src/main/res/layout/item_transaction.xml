@@ -78,6 +78,13 @@
             app:layout_constraintStart_toEndOf="@id/iv_transaction_icon"
             app:layout_constraintTop_toBottomOf="@id/tv_transaction_month" />
 
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/transaction_details_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="iv_transaction_icon,tv_reading" />
+
         <TextView
             android:id="@+id/tv_amount_paid"
             android:layout_width="0dp"
@@ -86,9 +93,10 @@
             android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
             android:textColor="@color/status_paid"
             android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/iv_transaction_icon" />
+            app:layout_constraintTop_toBottomOf="@id/transaction_details_bottom" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

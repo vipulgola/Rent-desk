@@ -28,28 +28,21 @@ class TransactionViewModel(private val repository: RentRepository) : ViewModel()
     suspend fun getProperty(propertyId: String): PropertyTenantInfo? =
         repository.getPropertyById(propertyId)
 
-    fun recordPayment(
-        transaction: RecordTransaction,
-        meterReading: Int,
-        balanceAmount: Double
-    ) = viewModelScope.launch {
-        repository.recordPayment(transaction, meterReading, balanceAmount)
-    }
+    suspend fun recordPayment(transaction: RecordTransaction) =
+        repository.recordPayment(transaction)
 
-    fun updateRecordedPayment(
-        transaction: RecordTransaction,
-        balanceDelta: Double
-    ) = viewModelScope.launch {
-        repository.updateRecordedPayment(transaction, balanceDelta)
-    }
+    suspend fun updateRecordedPayment(transaction: RecordTransaction) =
+        repository.updateRecordedPayment(transaction)
 
     fun updateTransaction(transaction: RecordTransaction) = viewModelScope.launch {
         repository.updateTransaction(transaction)
     }
 
-    fun deleteTransactions(transactions: List<RecordTransaction>) = viewModelScope.launch {
-        repository.deleteTransactions(transactions)
-    }
+    suspend fun deleteTransactions(
+        transactions: List<RecordTransaction>,
+        manualBalance: Double? = null,
+        manualReading: Int? = null
+    ) = repository.deleteTransactions(transactions, manualBalance, manualReading)
 }
 
 class TransactionViewModelFactory(private val repository: RentRepository) : ViewModelProvider.Factory {

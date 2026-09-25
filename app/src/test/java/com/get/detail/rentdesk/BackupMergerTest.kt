@@ -8,9 +8,37 @@ import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 import com.get.detail.rentdesk.utils.PaymentDateUtils
 import com.get.detail.rentdesk.utils.YearMonth
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class BackupMergerTest {
+    @Test
+    fun mergeKeepsNewerDeletionSoDriveCannotRestoreRemovedPayment() {
+        val deleted = transaction("transaction", 100.0, 100).copy(isDeleted = true)
+        val oldRemote = transaction("transaction", 100.0, 50)
+
+        val merged = BackupMerger.merge(
+            backupData(emptyList(), emptyList(), listOf(deleted)),
+            backupData(emptyList(), emptyList(), listOf(oldRemote))
+        )
+
+        assertTrue(merged.transactions.single().isDeleted)
+        assertEquals(0, merged.recordCounts.transactions)
+    }
+
+    @Test
+    fun mergePrefersDeletionWhenTimestampsMatch() {
+        val active = transaction("transaction", 100.0, 100)
+        val deleted = active.copy(isDeleted = true)
+
+        val merged = BackupMerger.merge(
+            backupData(emptyList(), emptyList(), listOf(active)),
+            backupData(emptyList(), emptyList(), listOf(deleted))
+        )
+
+        assertTrue(merged.transactions.single().isDeleted)
+    }
+
     @Test
     fun merge_keepsNewestMatchingEntriesAndRetainsUniqueEntries() {
         val local = backupData(

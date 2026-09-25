@@ -7,18 +7,31 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.get.detail.rentdesk.data.local.entity.RecordTransaction
+import com.get.detail.rentdesk.data.local.entity.PropertyTenantInfo
+import com.get.detail.rentdesk.domain.usecase.LegacyTransactionHistoryException
+import com.get.detail.rentdesk.domain.usecase.DeletionAdjustment
+import com.get.detail.rentdesk.domain.usecase.TransactionDeletionCalculator
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TransactionDao {
-    @Query("SELECT * FROM record_transaction WHERE propertyId = :propertyId ORDER BY paymentDateUtc DESC, createdAtUtc DESC")
+    @Query("SELECT * FROM record_transaction WHERE propertyId = :propertyId AND isDeleted = 0 ORDER BY paymentDateUtc DESC, createdAtUtc DESC")
     fun getTransactionsForProperty(propertyId: String): Flow<List<RecordTransaction>>
 
-    @Query("SELECT * FROM record_transaction")
+    @Query("SELECT * FROM record_transaction WHERE isDeleted = 0")
     fun getAllTransactionsFlow(): Flow<List<RecordTransaction>>
 
-    @Query("SELECT * FROM record_transaction")
+    @Query("SELECT * FROM record_transaction WHERE isDeleted = 0")
     suspend fun getAllTransactions(): List<RecordTransaction>
+
+    @Query("SELECT * FROM record_transaction")
+    suspend fun getAllTransactionRecords(): List<RecordTransaction>
+
+    @Query("SELECT * FROM record_transaction WHERE propertyId = :propertyId AND isDeleted = 0 ORDER BY createdAtUtc, transactionId")
+    suspend fun getActiveTransactionsForProperty(propertyId: String): List<RecordTransaction>
+
+    @Query("SELECT * FROM property_tenant_info WHERE propertyId = :propertyId")
+    suspend fun getPropertyForPayment(propertyId: String): PropertyTenantInfo?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: RecordTransaction)
@@ -64,15 +77,32 @@ interface TransactionDao {
     @Transaction
     suspend fun recordPayment(
         transaction: RecordTransaction,
-        meterReading: Int,
-        balanceAmount: Double,
         modifiedAtUtc: Long
     ) {
-        insertTransaction(transaction)
+        val property = getPropertyForPayment(transaction.propertyId)
+            ?: error("Property not found")
+        require(transaction.reading >= property.meterReading) {
+            "Current reading cannot be lower than the previous reading"
+        }
+        require(transaction.amountPaid.isFinite() && transaction.amountPaid >= 0.0)
+        val lastRecordedAt = getActiveTransactionsForProperty(transaction.propertyId)
+            .lastOrNull()?.createdAtUtc ?: 0L
+        val charge = property.monthlyRent +
+            (transaction.reading - property.meterReading) * property.electricityPricePerUnit
+        insertTransaction(
+            transaction.copy(
+                previousBalance = property.balanceAmount,
+                previousReading = property.meterReading,
+                rentCharged = property.monthlyRent.toDouble(),
+                electricityRateCharged = property.electricityPricePerUnit,
+                createdAtUtc = maxOf(transaction.createdAtUtc, lastRecordedAt + 1L),
+                modifiedAtUtc = modifiedAtUtc
+            )
+        )
         updatePropertyPaymentState(
             transaction.propertyId,
-            meterReading,
-            balanceAmount,
+            transaction.reading,
+            property.balanceAmount + charge - transaction.amountPaid,
             modifiedAtUtc
         )
     }
@@ -80,11 +110,25 @@ interface TransactionDao {
     @Transaction
     suspend fun updateRecordedPayment(
         transaction: RecordTransaction,
-        balanceDelta: Double,
         modifiedAtUtc: Long
     ) {
-        updateTransaction(transaction)
+        val transactions = getActiveTransactionsForProperty(transaction.propertyId)
+        val position = transactions.indexOfFirst { it.transactionId == transaction.transactionId }
+        require(position >= 0) { "Transaction not found" }
+        require(transaction.amountPaid.isFinite() && transaction.amountPaid >= 0.0)
+        val current = transactions[position]
+        val balanceDelta = current.amountPaid - transaction.amountPaid
+        updateTransaction(current.copy(
+            paymentDateUtc = transaction.paymentDateUtc,
+            amountPaid = transaction.amountPaid,
+            modifiedAtUtc = modifiedAtUtc
+        ))
         adjustPropertyBalance(transaction.propertyId, balanceDelta, modifiedAtUtc)
+        updateTransactions(transactions.drop(position + 1).mapNotNull { later ->
+            later.previousBalance?.let { previous ->
+                later.copy(previousBalance = previous + balanceDelta, modifiedAtUtc = modifiedAtUtc)
+            }
+        })
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -93,25 +137,53 @@ interface TransactionDao {
     @Update
     suspend fun updateTransaction(transaction: RecordTransaction)
 
-    @androidx.room.Delete
-    suspend fun deleteTransaction(transaction: RecordTransaction)
+    @Update
+    suspend fun updateTransactions(transactions: List<RecordTransaction>)
 
-    @androidx.room.Delete
-    suspend fun deleteTransactions(transactions: List<RecordTransaction>)
+    @Query("UPDATE record_transaction SET isDeleted = 1, modifiedAtUtc = :modifiedAtUtc WHERE transactionId IN (:ids) AND isDeleted = 0")
+    suspend fun markTransactionsDeleted(ids: List<String>, modifiedAtUtc: Long)
 
     @Transaction
     suspend fun deleteTransactionsAndRestoreBalance(
         transactions: List<RecordTransaction>,
-        modifiedAtUtc: Long
+        modifiedAtUtc: Long,
+        manualBalance: Double? = null,
+        manualReading: Int? = null
     ) {
-        transactions.groupBy { it.propertyId }.forEach { (propertyId, propertyTransactions) ->
-            adjustPropertyBalance(
-                propertyId,
-                propertyTransactions.sumOf { it.amountPaid },
-                modifiedAtUtc
+        if (transactions.isEmpty()) return
+        if (manualBalance != null || manualReading != null) {
+            require(transactions.map { it.propertyId }.distinct().size == 1) {
+                "A manual correction can only apply to one property"
+            }
+        }
+        transactions.groupBy { it.propertyId }.forEach { (propertyId, selected) ->
+            val active = getActiveTransactionsForProperty(propertyId)
+            val selectedIds = selected.map { it.transactionId }.toSet()
+            require(active.count { it.transactionId in selectedIds } == selectedIds.size) {
+                "One or more selected transactions no longer exist"
+            }
+            val adjustment = try {
+                TransactionDeletionCalculator.recalculate(active, selectedIds, modifiedAtUtc)
+            } catch (legacy: LegacyTransactionHistoryException) {
+                if (manualBalance == null || manualReading == null) throw legacy
+                require(manualBalance.isFinite() && manualReading >= 0) {
+                    "Invalid manual balance or reading"
+                }
+                // Historic bills have no charge snapshot. A manual correction cannot establish
+                // reliable intermediate snapshots for the remaining historic payments.
+                val remaining = active.filterNot { it.transactionId in selectedIds }
+                    .map { it.copy(previousBalance = null, previousReading = null,
+                        modifiedAtUtc = modifiedAtUtc) }
+                DeletionAdjustment(
+                    manualBalance, manualReading, remaining
+                )
+            }
+            updateTransactions(adjustment.updatedTransactions)
+            markTransactionsDeleted(selectedIds.toList(), modifiedAtUtc)
+            updatePropertyPaymentState(
+                propertyId, adjustment.reading, adjustment.balance, modifiedAtUtc
             )
         }
-        deleteTransactions(transactions)
     }
 
     @Query("DELETE FROM record_transaction")

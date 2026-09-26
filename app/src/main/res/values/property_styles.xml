@@ -1,0 +1,19 @@
+<resources>
+    <style name="ThemeOverlay.RentDesk.PropertyCard" parent="">
+        <item name="elevationOverlayEnabled">false</item>
+    </style>
+    <style name="Widget.RentDesk.PropertyLabel" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    <style name="Widget.RentDesk.PropertyValue" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">3dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+</resources>

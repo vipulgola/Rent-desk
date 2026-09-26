@@ -81,6 +81,9 @@ interface TransactionDao {
     ) {
         val property = getPropertyForPayment(transaction.propertyId)
             ?: error("Property not found")
+        require(property.tenantInfo != null && transaction.tenancyId == property.tenantInfo.tenancyId) {
+            "The tenant changed. Reopen Collect rent for the current tenant."
+        }
         require(transaction.reading >= property.meterReading) {
             "Current reading cannot be lower than the previous reading"
         }
@@ -112,7 +115,12 @@ interface TransactionDao {
         transaction: RecordTransaction,
         modifiedAtUtc: Long
     ) {
+        val property = getPropertyForPayment(transaction.propertyId) ?: error("Property not found")
         val transactions = getActiveTransactionsForProperty(transaction.propertyId)
+            .filter { it.tenancyId == property.tenantInfo?.tenancyId }
+        require(property.tenantInfo != null && transaction.tenancyId == property.tenantInfo.tenancyId) {
+            "Past tenant payments are read-only"
+        }
         val position = transactions.indexOfFirst { it.transactionId == transaction.transactionId }
         require(position >= 0) { "Transaction not found" }
         require(transaction.amountPaid.isFinite() && transaction.amountPaid >= 0.0)
@@ -120,6 +128,7 @@ interface TransactionDao {
         val balanceDelta = current.amountPaid - transaction.amountPaid
         updateTransaction(current.copy(
             paymentDateUtc = transaction.paymentDateUtc,
+            billingMonth = transaction.billingMonth,
             amountPaid = transaction.amountPaid,
             modifiedAtUtc = modifiedAtUtc
         ))
@@ -157,7 +166,10 @@ interface TransactionDao {
             }
         }
         transactions.groupBy { it.propertyId }.forEach { (propertyId, selected) ->
+            val property = getPropertyForPayment(propertyId) ?: error("Property not found")
+            require(property.tenantInfo != null) { "Past tenant payments are read-only" }
             val active = getActiveTransactionsForProperty(propertyId)
+                .filter { it.tenancyId == property.tenantInfo.tenancyId }
             val selectedIds = selected.map { it.transactionId }.toSet()
             require(active.count { it.transactionId in selectedIds } == selectedIds.size) {
                 "One or more selected transactions no longer exist"

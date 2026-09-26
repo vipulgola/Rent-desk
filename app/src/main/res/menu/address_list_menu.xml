@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_search_addresses"
+        android:icon="@drawable/ic_search_24"
+        android:title="@string/search_addresses"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+    <item
         android:id="@+id/action_edit_mode"
         android:title="@string/action_edit"
         app:showAsAction="never" />

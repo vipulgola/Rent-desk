@@ -9,6 +9,7 @@ import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
@@ -31,6 +32,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         lockManager = AppLockManager(this)
+        com.get.detail.rentdesk.notifications.RentReminderScheduler(this).ensureScheduled()
 
         setSupportActionBar(binding.toolbar)
 
@@ -41,7 +43,23 @@ class MainActivity : AppCompatActivity() {
         val appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
         setupMainMenu()
-        navController.addOnDestinationChangedListener { _, _, _ -> invalidateOptionsMenu() }
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            supportActionBar?.subtitle = null
+            val isPropertyList = destination.id == R.id.propertyListFragment
+            val isAddressList = destination.id == R.id.addressListFragment
+            val toolbarColor = ContextCompat.getColor(this, when {
+                isAddressList -> R.color.address_page_background
+                isPropertyList -> R.color.property_page_background
+                else -> R.color.app_surface
+            })
+            binding.toolbar.setBackgroundColor(toolbarColor)
+            (binding.toolbar.parent as android.view.View).setBackgroundColor(toolbarColor)
+            binding.toolbar.setTitleTextAppearance(this, if (isAddressList)
+                R.style.TextAppearance_RentDesk_AddressToolbar else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
+            binding.toolbar.setTitleTextColor(ContextCompat.getColor(this, if (isAddressList)
+                R.color.address_heading else R.color.text_primary))
+            invalidateOptionsMenu()
+        }
     }
 
     override fun onStart() {

@@ -1,0 +1,24 @@
+<resources>
+    <color name="address_page_background">#15191F</color>
+    <color name="address_action_background">#315B98</color>
+    <color name="address_heading">#E5ECFC</color>
+    <color name="address_card_outline">#353E4D</color>
+    <color name="address_active_outline">#425D83</color>
+    <color name="address_location_icon">#B0CBFF</color>
+    <color name="address_location_background">#263D60</color>
+    <color name="address_property_icon">#CCC2FF</color>
+    <color name="address_property_background">#3A335B</color>
+    <color name="address_occupied">#A5D9BB</color>
+    <color name="address_occupied_background">#233F31</color>
+    <color name="address_vacant">#EAC47B</color>
+    <color name="address_vacant_background">#463923</color>
+    <color name="address_empty_icon">#B8C5DD</color>
+    <color name="address_empty_icon_background">#323A4C</color>
+    <color name="address_pending">#FFADB8</color>
+    <color name="address_pending_background">#4F2B35</color>
+    <color name="address_art_cloud">#202D42</color>
+    <color name="address_art_building">#293C58</color>
+    <color name="address_art_roof">#4A6385</color>
+    <color name="address_art_tree">#2E514E</color>
+    <color name="address_art_window">#354D6E</color>
+</resources>

@@ -11,54 +11,49 @@ import java.util.TimeZone
 
 object DataExporter {
 
-    fun toCsv(properties: List<PropertyTenantInfo>, transactions: List<RecordTransaction>): String {
-        val builder = StringBuilder()
-        // Header
-        builder.append("Property ID,Property Name,Tenant Name,Mobile,Joining Date,Address,Monthly Rent,Electricity Price Per Unit,Property Meter Reading,Property Balance,Property Created UTC,Property Modified UTC,Transaction ID,Payment Date,Reading,Amount Received,Transaction Created UTC,Transaction Modified UTC\n")
-
-        val propertyMap = properties.associateBy { it.propertyId }
-
-        transactions.forEach { trans ->
-            val prop = propertyMap[trans.propertyId]
-            builder.append("${escapeCsv(trans.propertyId)},")
-            builder.append("${escapeCsv(prop?.entityName ?: "N/A")},")
-            builder.append("${escapeCsv(prop?.tenantInfo?.name ?: "N/A")},")
-            builder.append("${escapeCsv(prop?.tenantInfo?.mobileNumber ?: "N/A")},")
-            builder.append("${escapeCsv(formatJoiningDate(prop?.tenantInfo))},")
-            builder.append("${escapeCsv(prop?.tenantInfo?.address ?: "N/A")},")
-            builder.append("${prop?.monthlyRent ?: 0},")
-            builder.append("${prop?.electricityPricePerUnit ?: 0.0},")
-            builder.append("${prop?.meterReading ?: 0},")
-            builder.append("${prop?.balanceAmount ?: 0.0},")
-            builder.append("${escapeCsv(formatUtc(prop?.createdAtUtc))},")
-            builder.append("${escapeCsv(formatUtc(prop?.modifiedAtUtc))},")
-            builder.append("${escapeCsv(trans.transactionId)},")
-            builder.append("${escapeCsv(PaymentDateUtils.format(trans.paymentDateUtc))},")
-            builder.append("${trans.reading},")
-            builder.append("${trans.amountPaid},")
-            builder.append("${escapeCsv(formatUtc(trans.createdAtUtc))},")
-            builder.append("${escapeCsv(formatUtc(trans.modifiedAtUtc))}\n")
+    fun toCsv(properties: List<PropertyTenantInfo>, transactions: List<RecordTransaction>): String = buildString {
+        val headers = listOf("Property ID", "Property Name", "Tenant Name", "Mobile", "Joining Date", "Address",
+            "Monthly Rent", "Electricity Price Per Unit", "Property Meter Reading", "Property Balance",
+            "Property Created UTC", "Property Modified UTC", "Transaction ID", "Payment Date", "Reading",
+            "Amount Received", "Transaction Created UTC", "Transaction Modified UTC", "Rent For", "Tenancy ID",
+            "Tenant Status", "Deposit Received", "Deposit Deductions", "Deposit Refunded", "Deposit Notes")
+        appendLine(headers.joinToString(","))
+        fun row(property: PropertyTenantInfo, tenant: TenantInfo?, transaction: RecordTransaction?,
+            rent: Int, balance: Double, status: String) {
+            val values = listOf(property.propertyId, property.entityName, tenant?.name ?: "N/A",
+                tenant?.mobileNumber ?: "N/A", formatJoiningDate(tenant), tenant?.address ?: "N/A",
+                rent.toString(), property.electricityPricePerUnit.toString(), property.meterReading.toString(),
+                balance.toString(), formatUtc(property.createdAtUtc), formatUtc(property.modifiedAtUtc),
+                transaction?.transactionId.orEmpty(), transaction?.let { PaymentDateUtils.format(it.paymentDateUtc) }.orEmpty(),
+                transaction?.reading?.toString().orEmpty(), transaction?.amountPaid?.toString().orEmpty(),
+                transaction?.let { formatUtc(it.createdAtUtc) }.orEmpty(),
+                transaction?.let { formatUtc(it.modifiedAtUtc) }.orEmpty(), transaction?.rentMonth()?.toString().orEmpty(),
+                (tenant?.tenancyId ?: transaction?.tenancyId).orEmpty(), status, tenant?.depositReceived?.toString().orEmpty(),
+                tenant?.depositDeductions?.toString().orEmpty(), tenant?.depositRefunded?.toString().orEmpty(),
+                tenant?.depositNotes.orEmpty())
+            appendLine(values.joinToString(",") { escapeCsv(it) })
         }
-
-        // Add properties without transactions
-        val transPropIds = transactions.map { it.propertyId }.toSet()
-        properties.filter { it.propertyId !in transPropIds }.forEach { prop ->
-            builder.append("${escapeCsv(prop.propertyId)},")
-            builder.append("${escapeCsv(prop.entityName)},")
-            builder.append("${escapeCsv(prop.tenantInfo?.name ?: "N/A")},")
-            builder.append("${escapeCsv(prop.tenantInfo?.mobileNumber ?: "N/A")},")
-            builder.append("${escapeCsv(formatJoiningDate(prop.tenantInfo))},")
-            builder.append("${escapeCsv(prop.tenantInfo?.address ?: "N/A")},")
-            builder.append("${prop.monthlyRent},")
-            builder.append("${prop.electricityPricePerUnit},")
-            builder.append("${prop.meterReading},")
-            builder.append("${prop.balanceAmount},")
-            builder.append("${escapeCsv(formatUtc(prop.createdAtUtc))},")
-            builder.append("${escapeCsv(formatUtc(prop.modifiedAtUtc))},")
-            builder.append(",,,,,\n")
+        properties.forEach { property ->
+            val payments = transactions.filter { it.propertyId == property.propertyId && !it.isDeleted }
+            payments.forEach { payment ->
+                val archived = property.tenantHistory.orEmpty().firstOrNull { it.tenant.tenancyId == payment.tenancyId }
+                val active = property.tenantInfo?.takeIf { it.tenancyId == payment.tenancyId }
+                row(property, archived?.tenant ?: active, payment, archived?.monthlyRent ?: property.monthlyRent,
+                    archived?.closingBalance ?: if (active != null) property.balanceAmount
+                        else property.unassignedBalance ?: property.balanceAmount,
+                    if (archived != null) "Previous" else if (active != null) "Current" else "Unknown")
+            }
+            property.tenantInfo?.let { tenant ->
+                if (payments.none { it.tenancyId == tenant.tenancyId })
+                    row(property, tenant, null, property.monthlyRent, property.balanceAmount, "Current")
+            }
+            property.tenantHistory.orEmpty().forEach { entry ->
+                if (payments.none { it.tenancyId == entry.tenant.tenancyId })
+                    row(property, entry.tenant, null, entry.monthlyRent, entry.closingBalance, "Previous")
+            }
+            if (payments.isEmpty() && property.tenantInfo == null && property.tenantHistory.isNullOrEmpty())
+                row(property, null, null, property.monthlyRent, property.balanceAmount, "Vacant")
         }
-
-        return builder.toString()
     }
 
     private fun escapeCsv(value: String): String {

@@ -21,7 +21,9 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             app:navigationIconTint="@color/text_primary"
-            app:titleTextAppearance="@style/TextAppearance.Material3.TitleLarge"
+            app:subtitleTextAppearance="@style/TextAppearance.RentDesk.ToolbarSubtitle"
+            app:subtitleTextColor="@color/text_secondary"
+            app:titleTextAppearance="@style/TextAppearance.Material3.TitleMedium"
             app:titleTextColor="@color/text_primary" />
 
     </com.google.android.material.appbar.AppBarLayout>

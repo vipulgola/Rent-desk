@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -34,6 +35,9 @@ import com.get.detail.rentdesk.domain.usecase.RentBreakdown
 import com.get.detail.rentdesk.domain.usecase.RentCalculator
 import com.get.detail.rentdesk.domain.usecase.LegacyTransactionHistoryException
 import com.get.detail.rentdesk.utils.PaymentDateUtils
+import com.get.detail.rentdesk.utils.RentMonthPicker
+import com.get.detail.rentdesk.utils.YearMonth
+import com.get.detail.rentdesk.domain.usecase.PaymentStatusCalculator
 import com.get.detail.rentdesk.viewmodel.TransactionViewModel
 import com.get.detail.rentdesk.viewmodel.TransactionViewModelFactory
 import kotlinx.coroutines.launch
@@ -59,10 +63,12 @@ class TransactionListFragment : Fragment() {
 
     private var propertyId: String? = null
     private lateinit var adapter: TransactionAdapter
+    private var pendingQuickCollect = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         propertyId = arguments?.getString("propertyId")
+        pendingQuickCollect = savedInstanceState == null && arguments?.getBoolean("collectRent", false) == true
 
         requireActivity().onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -111,14 +117,20 @@ class TransactionListFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     viewModel.getPropertyFlow(id).collect { property ->
+                        binding.fabAddTransaction.visibility =
+                            if (property?.tenantInfo != null && !adapter.isSelectionMode) View.VISIBLE else View.GONE
+                        if (pendingQuickCollect && property?.tenantInfo != null) {
+                            pendingQuickCollect = false
+                            showNewTransactionDialog(property)
+                        }
                         val balanceAmount = property?.balanceAmount ?: 0.0
                         val hasBalance = kotlin.math.abs(balanceAmount) > 0.005
-                        binding.tvBalanceStatus.visibility =
+                        binding.balanceCard.visibility =
                             if (hasBalance) View.VISIBLE else View.GONE
                         val isCredit = balanceAmount < -0.005
-                        binding.tvBalanceStatus.setBackgroundResource(
-                            if (isCredit) R.color.status_paid_container
-                            else R.color.status_due_container
+                        binding.balanceCard.setCardBackgroundColor(
+                            ContextCompat.getColor(requireContext(),
+                                if (isCredit) R.color.status_paid_container else R.color.status_due_container)
                         )
                         binding.tvBalanceStatus.setTextColor(
                             ContextCompat.getColor(
@@ -126,10 +138,20 @@ class TransactionListFragment : Fragment() {
                                 if (isCredit) R.color.status_paid else R.color.status_due
                             )
                         )
-                        binding.tvBalanceStatus.text = getString(
-                            R.string.balance_status,
-                            money(balanceAmount)
+                        binding.tvBalanceLabel.text = getString(
+                            if (isCredit) R.string.credit_balance else R.string.outstanding_balance
                         )
+                        binding.tvBalanceLabel.setTextColor(ContextCompat.getColor(
+                            requireContext(), if (isCredit) R.color.status_paid else R.color.status_due
+                        ))
+                        binding.tvBalanceStatus.text = money(kotlin.math.abs(balanceAmount))
+                        property?.let {
+                            (requireActivity() as AppCompatActivity).supportActionBar?.apply {
+                                title = getString(R.string.transactions)
+                                subtitle = listOfNotNull(it.entityName, it.tenantInfo?.name)
+                                    .joinToString(" · ")
+                            }
+                        }
                     }
                 }
             }
@@ -274,21 +296,27 @@ class TransactionListFragment : Fragment() {
 
     private fun showNewTransactionDialog(property: PropertyTenantInfo) {
         val dialogBinding = DialogTransactionBinding.inflate(layoutInflater)
+        dialogBinding.tvDialogTitle.setText(R.string.add_transaction)
+        dialogBinding.etRentAmount.setText(
+            NumberFormat.getIntegerInstance(Locale("en", "IN")).format(property.monthlyRent)
+        )
         dialogBinding.etPaymentDate.setText(PaymentDateUtils.format(PaymentDateUtils.today()))
         setupPaymentDatePicker(dialogBinding)
+        val selectedBillingMonth = setupBillingMonthPicker(dialogBinding,
+            PaymentStatusCalculator.billingMonth(property) ?: YearMonth.now())
         dialogBinding.etReading.setText(property.meterReading.toString())
 
         var calculated: RentBreakdown? = null
         var calculatedReading: Int? = null
 
         val dialog = AlertDialog.Builder(requireContext())
-            .setTitle(R.string.add_transaction)
             .setView(dialogBinding.root)
-            .setPositiveButton(R.string.payment_received, null)
+            .setPositiveButton(R.string.save, null)
             .setNegativeButton(R.string.cancel, null)
             .create()
 
         dialog.setOnShowListener {
+            dialogBinding.btnCloseTransaction.setOnClickListener { dialog.dismiss() }
             dialogBinding.btnCalculateRate.setOnClickListener {
                 dialogBinding.tilReading.error = null
                 val currentReading = dialogBinding.etReading.text?.toString()?.trim()?.toIntOrNull()
@@ -321,6 +349,7 @@ class TransactionListFragment : Fragment() {
                 )
                 dialogBinding.tvCalculationBreakdown.visibility = View.VISIBLE
                 dialogBinding.tilAmountReceived.visibility = View.VISIBLE
+                dialogBinding.etAmountReceived.setText(decimalText(breakdown.totalAmount.coerceAtLeast(0.0)))
             }
 
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
@@ -356,7 +385,9 @@ class TransactionListFragment : Fragment() {
                     propertyId = property.propertyId,
                     paymentDateUtc = paymentDateUtc,
                     reading = currentReading,
-                    amountPaid = amountReceived
+                    amountPaid = amountReceived,
+                    billingMonth = selectedBillingMonth(),
+                    tenancyId = property.tenantInfo?.tenancyId
                 )
                 viewLifecycleOwner.lifecycleScope.launch {
                     try {
@@ -373,6 +404,7 @@ class TransactionListFragment : Fragment() {
             }
         }
         dialog.show()
+        dialogBinding.btnCalculateRate.performClick()
     }
 
     private fun showEditTransactionDialog(transaction: RecordTransaction) {
@@ -384,8 +416,14 @@ class TransactionListFragment : Fragment() {
             }
 
             val dialogBinding = DialogTransactionBinding.inflate(layoutInflater)
+            dialogBinding.tvDialogTitle.setText(R.string.edit_transaction)
+            dialogBinding.etRentAmount.setText(
+                NumberFormat.getIntegerInstance(Locale("en", "IN"))
+                    .format(transaction.rentCharged ?: property.monthlyRent.toDouble())
+            )
             dialogBinding.etPaymentDate.setText(PaymentDateUtils.format(transaction.paymentDateUtc))
             setupPaymentDatePicker(dialogBinding)
+            val selectedBillingMonth = setupBillingMonthPicker(dialogBinding, transaction.rentMonth())
             dialogBinding.etReading.setText(transaction.reading.toString())
             dialogBinding.etReading.isEnabled = false
             dialogBinding.btnCalculateRate.visibility = View.GONE
@@ -393,13 +431,13 @@ class TransactionListFragment : Fragment() {
             dialogBinding.etAmountReceived.setText(decimalText(transaction.amountPaid))
 
             val dialog = AlertDialog.Builder(requireContext())
-                .setTitle(R.string.edit_transaction)
                 .setView(dialogBinding.root)
-                .setPositiveButton(R.string.update_transaction, null)
+                .setPositiveButton(R.string.save, null)
                 .setNegativeButton(R.string.cancel, null)
                 .create()
 
             dialog.setOnShowListener {
+                dialogBinding.btnCloseTransaction.setOnClickListener { dialog.dismiss() }
                 dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
                     dialogBinding.tilPaymentDate.error = null
                     dialogBinding.tilAmountReceived.error = null
@@ -420,6 +458,7 @@ class TransactionListFragment : Fragment() {
 
                     val updated = transaction.copy(
                         paymentDateUtc = paymentDateUtc,
+                        billingMonth = selectedBillingMonth(),
                         amountPaid = amountReceived
                     )
                     viewLifecycleOwner.lifecycleScope.launch {
@@ -438,6 +477,20 @@ class TransactionListFragment : Fragment() {
             }
             dialog.show()
         }
+    }
+
+    private fun setupBillingMonthPicker(dialogBinding: DialogTransactionBinding, initial: YearMonth): () -> YearMonth {
+        var selected = initial
+        dialogBinding.etBillingMonth.setText(RentMonthPicker.label(selected))
+        val openPicker = {
+            RentMonthPicker.show(requireContext(), selected) {
+                selected = it
+                dialogBinding.etBillingMonth.setText(RentMonthPicker.label(it))
+            }
+        }
+        dialogBinding.etBillingMonth.setOnClickListener { openPicker() }
+        dialogBinding.tilBillingMonth.setEndIconOnClickListener { openPicker() }
+        return { selected }
     }
 
     private fun setupPaymentDatePicker(dialogBinding: DialogTransactionBinding) {

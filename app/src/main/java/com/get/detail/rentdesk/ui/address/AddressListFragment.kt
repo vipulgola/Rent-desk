@@ -7,9 +7,7 @@ import android.view.ViewGroup
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.EditText
-import android.widget.FrameLayout
-import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
@@ -21,8 +19,12 @@ import androidx.navigation.fragment.findNavController
 import com.get.detail.rentdesk.R
 import com.get.detail.rentdesk.data.local.AppDatabase
 import com.get.detail.rentdesk.data.local.entity.Address
+import com.get.detail.rentdesk.domain.model.AddressOverview
+import androidx.recyclerview.widget.ConcatAdapter
 import com.get.detail.rentdesk.data.repository.RentRepository
 import com.get.detail.rentdesk.databinding.FragmentAddressListBinding
+import com.get.detail.rentdesk.databinding.DialogNameBinding
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.get.detail.rentdesk.viewmodel.AddressViewModel
 import com.get.detail.rentdesk.viewmodel.AddressViewModelFactory
 import kotlinx.coroutines.launch
@@ -39,6 +41,9 @@ class AddressListFragment : Fragment() {
     }
 
     private lateinit var adapter: AddressAdapter
+    private lateinit var summaryAdapter: AddressSummaryAdapter
+    private var allAddresses: List<AddressOverview> = emptyList()
+    private var searchQuery = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,23 +59,21 @@ class AddressListFragment : Fragment() {
         setupMenu()
 
         adapter = AddressAdapter(
-            onClick = { addressWithCount ->
-                val bundle = Bundle().apply {
-                    putString("addressId", addressWithCount.dataUUID)
-                }
-                findNavController().navigate(R.id.action_addressListFragment_to_propertyListFragment, bundle)
+            onClick = { address -> openProperties(address) },
+            onEdit = { address ->
+                showAddressDialog(address.dataUUID, address.address)
             },
-            onEdit = { addressWithCount ->
-                showAddressDialog(addressWithCount.dataUUID, addressWithCount.address)
-            }
+            onAddProperty = { address -> openProperties(address, addProperty = true) }
         )
-        binding.rvAddresses.adapter = adapter
+        summaryAdapter = AddressSummaryAdapter()
+        binding.rvAddresses.adapter = ConcatAdapter(summaryAdapter, adapter)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.addressesWithCount.collect { addresses ->
-                    adapter.submitList(addresses)
-                    binding.tvEmptyState.visibility = if (addresses.isEmpty()) View.VISIBLE else View.GONE
+                viewModel.addressOverviews.collect { addresses ->
+                    allAddresses = addresses
+                    summaryAdapter.update(addresses.size, addresses.sumOf { it.propertyCount })
+                    applySearch()
                 }
             }
         }
@@ -80,11 +83,30 @@ class AddressListFragment : Fragment() {
         }
     }
 
+    private fun openProperties(address: AddressOverview, addProperty: Boolean = false) {
+        findNavController().navigate(
+            R.id.action_addressListFragment_to_propertyListFragment,
+            Bundle().apply {
+                putString("addressId", address.dataUUID)
+                putBoolean("addProperty", addProperty)
+            }
+        )
+    }
+
     private fun setupMenu() {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.address_list_menu, menu)
+                (menu.findItem(R.id.action_search_addresses).actionView as SearchView)
+                    .setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                        override fun onQueryTextSubmit(query: String?) = false
+                        override fun onQueryTextChange(query: String?): Boolean {
+                            searchQuery = query.orEmpty()
+                            applySearch()
+                            return true
+                        }
+                    })
             }
 
             override fun onPrepareMenu(menu: Menu) {
@@ -105,46 +127,48 @@ class AddressListFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    private fun showAddressDialog(addressId: String? = null, currentName: String = "") {
-        val context = requireContext()
-        val editText = EditText(context)
-        editText.hint = getString(R.string.address)
-        editText.setText(currentName)
-        editText.setSelection(editText.text.length)
-        
-        val container = FrameLayout(context)
-        val params = FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        val margin = (20 * resources.displayMetrics.density).toInt()
-        params.marginStart = margin
-        params.marginEnd = margin
-        editText.layoutParams = params
-        container.addView(editText)
-        
-        AlertDialog.Builder(context)
-            .setTitle(if (addressId == null) R.string.add_address else R.string.edit_address)
-            .setView(container)
-            .setPositiveButton(R.string.save) { _, _ ->
-                val addressName = editText.text.toString().trim()
-                if (addressName.isNotBlank()) {
-                    if (addressId == null) {
-                        val address = Address(
-                            dataUUID = UUID.randomUUID().toString(),
-                            address = addressName
-                        )
-                        viewModel.insertAddress(address)
-                    } else {
-                        viewModel.updateAddressName(addressId, addressName)
-                    }
-                }
+    private fun applySearch() {
+        if (::adapter.isInitialized && ::summaryAdapter.isInitialized) {
+            val matches = allAddresses.filter {
+                it.address.contains(searchQuery, ignoreCase = true)
             }
-            .setNegativeButton(R.string.cancel, null)
-            .show()
+            adapter.submitList(matches)
+            summaryAdapter.setEmptyState(
+                if (matches.isNotEmpty()) null
+                else if (allAddresses.isEmpty()) R.string.address_dashboard_empty
+                else R.string.no_matching_addresses
+            )
+        }
+    }
+
+    private fun showAddressDialog(addressId: String? = null, currentName: String = "") {
+        val sheet = DialogNameBinding.inflate(layoutInflater)
+        val dialog = BottomSheetDialog(requireContext())
+        sheet.tvDialogTitle.setText(if (addressId == null) R.string.add_address else R.string.edit_address)
+        sheet.tilName.hint = getString(R.string.address)
+        sheet.ivNameIcon.setImageResource(R.drawable.ic_location_24)
+        sheet.etName.setText(currentName)
+        sheet.etName.setSelection(sheet.etName.text?.length ?: 0)
+        sheet.btnCancelName.setOnClickListener { dialog.dismiss() }
+        sheet.btnSaveName.setOnClickListener {
+            val name = sheet.etName.text.toString().trim()
+            if (name.isBlank()) {
+                sheet.tilName.error = getString(R.string.name_required)
+                return@setOnClickListener
+            }
+            if (addressId == null) {
+                viewModel.insertAddress(Address(UUID.randomUUID().toString(), name))
+            } else {
+                viewModel.updateAddressName(addressId, name)
+            }
+            dialog.dismiss()
+        }
+        dialog.setContentView(sheet.root)
+        dialog.show()
     }
 
     override fun onDestroyView() {
+        binding.rvAddresses.adapter = null
         super.onDestroyView()
         _binding = null
     }

@@ -1,0 +1,71 @@
+<resources>
+    <color name="address_page_background">#F8F9FC</color>
+    <color name="address_action_background">#225BB8</color>
+    <color name="address_heading">#10214D</color>
+    <color name="address_card_outline">#E7EAF2</color>
+    <color name="address_active_outline">#CFE3FF</color>
+    <color name="address_location_icon">#165CDD</color>
+    <color name="address_location_background">#E5EFFF</color>
+    <color name="address_property_icon">#5546C5</color>
+    <color name="address_property_background">#ECE9FF</color>
+    <color name="address_occupied">#117B48</color>
+    <color name="address_occupied_background">#E4F7EC</color>
+    <color name="address_vacant">#986006</color>
+    <color name="address_vacant_background">#FFF4DC</color>
+    <color name="address_empty_icon">#60708F</color>
+    <color name="address_empty_icon_background">#ECEEF7</color>
+    <color name="address_pending">#BF2041</color>
+    <color name="address_pending_background">#FFE2E8</color>
+    <color name="address_art_cloud">#EAF2FF</color>
+    <color name="address_art_building">#DCE8FC</color>
+    <color name="address_art_roof">#AFC5E9</color>
+    <color name="address_art_tree">#C7E4E1</color>
+    <color name="address_art_window">#CADAF3</color>
+
+    <string name="address_dashboard_subtitle">Manage your rental locations</string>
+    <string name="address_dashboard_empty">Your rental locations will appear here.\nTap Add address to get started.</string>
+    <string name="address_no_properties">No properties yet</string>
+    <string name="address_add_first_property">Add first property</string>
+    <string name="address_occupied_count">%1$d Occupied</string>
+    <string name="address_vacant_count">%1$d Vacant</string>
+    <string name="address_pending_amount">%1$s pending</string>
+    <string name="address_pending_description">%1$s pending for %2$s</string>
+    <string name="address_no_pending">No pending dues</string>
+    <plurals name="address_locations_label">
+        <item quantity="one">Location</item>
+        <item quantity="other">Locations</item>
+    </plurals>
+    <plurals name="address_properties_label">
+        <item quantity="one">Property</item>
+        <item quantity="other">Properties</item>
+    </plurals>
+
+    <style name="TextAppearance.RentDesk.AddressToolbar" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/address_heading</item>
+    </style>
+    <style name="Widget.RentDesk.AddressSummaryCard" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:theme">@style/ThemeOverlay.RentDesk.PropertyCard</item>
+        <item name="cardBackgroundColor">@color/app_surface</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+    <style name="Widget.RentDesk.AddressBadge" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">28dp</item>
+        <item name="android:background">@drawable/bg_address_badge</item>
+        <item name="android:paddingHorizontal">10dp</item>
+        <item name="android:paddingVertical">6dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="drawableStartCompat">@drawable/ic_address_status_dot</item>
+    </style>
+</resources>

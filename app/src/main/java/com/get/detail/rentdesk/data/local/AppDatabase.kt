@@ -17,7 +17,7 @@ import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 
 @Database(
     entities = [PropertyTenantInfo::class, RecordTransaction::class, Address::class],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -37,11 +37,31 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "rent_desk_database"
                 )
-                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                     .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+    }
+}
+
+val MIGRATION_5_6 = object : Migration(5, 6) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE `property_tenant_info` ADD COLUMN `tenantHistory` TEXT")
+        db.execSQL("ALTER TABLE `property_tenant_info` ADD COLUMN `unassignedBalance` REAL")
+        db.execSQL("ALTER TABLE `record_transaction` ADD COLUMN `billingMonth` TEXT")
+        db.execSQL("ALTER TABLE `record_transaction` ADD COLUMN `tenancyId` TEXT")
+        val converters = Converters()
+        db.query("SELECT propertyId, tenantInfo FROM property_tenant_info WHERE tenantInfo IS NOT NULL").use { cursor ->
+            while (cursor.moveToNext()) {
+                val id = cursor.getString(0)
+                val tenant = converters.toTenantInfo(cursor.getString(1)) ?: continue
+                val tenancyId = tenant.tenancyId ?: "legacy-$id"
+                db.execSQL("UPDATE property_tenant_info SET tenantInfo = ? WHERE propertyId = ?",
+                    arrayOf(converters.fromTenantInfo(tenant.copy(tenancyId = tenancyId)), id))
+                db.execSQL("UPDATE record_transaction SET tenancyId = ? WHERE propertyId = ?", arrayOf(tenancyId, id))
             }
         }
     }

@@ -9,6 +9,18 @@ data class RentBreakdown(
 )
 
 object RentCalculator {
+    private const val LOW_USAGE_LIMIT = 10
+    private const val MINIMUM_ELECTRICITY_CHARGE = 100.0
+
+    fun electricityCharge(
+        consumedUnits: Int,
+        pricePerUnit: Double
+    ): Double {
+        val meteredCharge = consumedUnits * pricePerUnit
+        return if (consumedUnits < LOW_USAGE_LIMIT) meteredCharge.coerceAtLeast(MINIMUM_ELECTRICITY_CHARGE)
+        else meteredCharge
+    }
+
     fun calculate(
         previousReading: Int,
         currentReading: Int,
@@ -20,7 +32,7 @@ object RentCalculator {
             "Current reading cannot be lower than the previous reading"
         }
         val consumedUnits = currentReading - previousReading
-        val electricityCost = consumedUnits * electricityPricePerUnit
+        val electricityCost = electricityCharge(consumedUnits, electricityPricePerUnit)
         val rentAmount = monthlyRent.toDouble()
         return RentBreakdown(
             consumedUnits = consumedUnits,

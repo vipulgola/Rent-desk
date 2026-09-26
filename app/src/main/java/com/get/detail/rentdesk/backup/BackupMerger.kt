@@ -28,8 +28,14 @@ object BackupMerger {
         remote,
         PropertyTenantInfo::propertyId
     ) { localItem, remoteItem ->
-        newer(localItem.modifiedAtUtc, remoteItem.modifiedAtUtc, localItem, remoteItem).copy(
-            createdAtUtc = earliest(localItem.createdAtUtc, remoteItem.createdAtUtc)
+        val winner = newer(localItem.modifiedAtUtc, remoteItem.modifiedAtUtc, localItem, remoteItem)
+        val other = if (winner === localItem) remoteItem else localItem
+        val history = (other.tenantHistory.orEmpty() + winner.tenantHistory.orEmpty())
+            .filter { it.tenant.tenancyId != winner.tenantInfo?.tenancyId }
+            .associateBy { it.tenant.tenancyId }.values.sortedBy { it.vacatedAtUtc }
+        winner.copy(
+            createdAtUtc = earliest(localItem.createdAtUtc, remoteItem.createdAtUtc),
+            tenantHistory = history
         )
     }
 

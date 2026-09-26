@@ -40,7 +40,9 @@ object TransactionDeletionCalculator {
                 previousReading = reading,
                 modifiedAtUtc = modifiedAtUtc
             )
-            balance += rent + (transaction.reading - reading) * rate - transaction.amountPaid
+            balance += rent + RentCalculator.electricityCharge(
+                transaction.reading - reading, rate
+            ) - transaction.amountPaid
             reading = transaction.reading
         }
         return DeletionAdjustment(balance, reading, updates)

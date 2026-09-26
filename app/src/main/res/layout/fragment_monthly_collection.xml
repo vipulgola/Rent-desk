@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/property_page_background"
+    android:fillViewport="true"
+    android:clipToPadding="false">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.RentDesk.CollectionCard"
+            app:cardCornerRadius="16dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_previous_month"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/previous_month"
+                    android:padding="12dp"
+                    android:rotation="180"
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="@color/brand_primary" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_summary_month"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:minWidth="0dp"
+                    android:minHeight="48dp"
+                    android:paddingHorizontal="4dp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="December 2026" />
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_next_month"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/next_month"
+                    android:padding="12dp"
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="@color/brand_primary" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_collection_hero"
+            android:orientation="vertical"
+            android:padding="22dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    style="@style/Widget.RentDesk.CollectionLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/monthly_collected"
+                    android:textColor="@color/collection_hero_secondary"
+                    android:textSize="16sp" />
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/bg_collection_wallet"
+                    android:contentDescription="@null"
+                    android:padding="10dp"
+                    app:srcCompat="@drawable/ic_wallet_24"
+                    app:tint="@color/white" />
+            </LinearLayout>
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_monthly_collected"
+                style="@style/Widget.RentDesk.CollectionAmount"
+                android:layout_marginTop="2dp"
+                android:textColor="@color/white"
+                android:textSize="40sp"
+                app:autoSizeMaxTextSize="40sp"
+                app:autoSizeMinTextSize="20sp"
+                tools:text="₹0" />
+            <TextView
+                android:id="@+id/tv_collection_status"
+                style="@style/Widget.RentDesk.CollectionLabel"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/collection_hero_secondary"
+                tools:text="No payments recorded yet" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    style="@style/Widget.RentDesk.CollectionLabel"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="@string/collection_progress"
+                    android:textColor="@color/collection_hero_secondary"
+                    android:textSize="13sp" />
+                <TextView
+                    android:id="@+id/tv_collection_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    tools:text="0%" />
+            </LinearLayout>
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/collection_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:indeterminate="false"
+                android:max="1000"
+                app:indicatorColor="@color/collection_hero_accent"
+                app:trackColor="@color/collection_hero_track"
+                app:trackCornerRadius="4dp"
+                app:trackThickness="8dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.RentDesk.CollectionCard"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/brand_primary_container"
+                app:strokeWidth="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        app:srcCompat="@drawable/ic_receipt_24"
+                        app:tint="@color/brand_primary" />
+                    <TextView
+                        style="@style/Widget.RentDesk.CollectionLabel"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/collection_total_due"
+                        android:textColor="@color/brand_primary" />
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_monthly_expected"
+                        style="@style/Widget.RentDesk.CollectionAmount"
+                        tools:text="₹4,000" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.RentDesk.CollectionCard"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/status_due_container"
+                app:strokeWidth="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        app:srcCompat="@drawable/ic_clock_24"
+                        app:tint="@color/status_due" />
+                    <TextView
+                        style="@style/Widget.RentDesk.CollectionLabel"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/collection_left_to_collect"
+                        android:textColor="@color/status_due" />
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_monthly_pending"
+                        style="@style/Widget.RentDesk.CollectionAmount"
+                        android:textColor="@color/status_due"
+                        tools:text="₹4,000" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="12dp"
+            android:text="@string/collection_breakdown_title"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+        <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.RentDesk.CollectionCard">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="18dp"
+                android:paddingVertical="10dp">
+                <LinearLayout style="@style/Widget.RentDesk.CollectionRow">
+                    <TextView
+                        style="@style/Widget.RentDesk.CollectionRowLabel"
+                        android:text="@string/collection_opening_balance" />
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_opening_balance"
+                        style="@style/Widget.RentDesk.CollectionRowAmount"
+                        tools:text="₹0" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/outline_soft" />
+                <LinearLayout style="@style/Widget.RentDesk.CollectionRow">
+                    <TextView
+                        style="@style/Widget.RentDesk.CollectionRowLabel"
+                        android:text="@string/collection_rent" />
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_rent_total"
+                        style="@style/Widget.RentDesk.CollectionRowAmount"
+                        tools:text="₹4,000" />
+                </LinearLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/outline_soft" />
+                <LinearLayout style="@style/Widget.RentDesk.CollectionRow">
+                    <TextView
+                        style="@style/Widget.RentDesk.CollectionRowLabel"
+                        android:text="@string/collection_electricity" />
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_electricity_total"
+                        style="@style/Widget.RentDesk.CollectionRowAmount"
+                        tools:text="₹0" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/row_credit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/outline_soft" />
+                    <LinearLayout style="@style/Widget.RentDesk.CollectionRow">
+                        <TextView
+                            style="@style/Widget.RentDesk.CollectionRowLabel"
+                            android:text="@string/collection_credit"
+                            android:textColor="@color/status_paid" />
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tv_credit_total"
+                            style="@style/Widget.RentDesk.CollectionRowAmount"
+                            android:textColor="@color/status_paid"
+                            tools:text="₹500" />
+                    </LinearLayout>
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_monthly_estimate"
+                    style="@style/Widget.RentDesk.CollectionLabel"
+                    android:layout_marginTop="4dp"
+                    android:paddingVertical="8dp"
+                    android:text="@string/collection_estimated"
+                    android:textColor="@color/brand_primary"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_collection_help"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:minHeight="48dp"
+            android:text="@string/collection_help_title"
+            android:textAllCaps="false"
+            android:textSize="14sp"
+            app:icon="@drawable/ic_info_24"
+            app:iconSize="18dp" />
+    </LinearLayout>
+</ScrollView>

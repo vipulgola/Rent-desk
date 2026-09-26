@@ -1,54 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/property_page_background">
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_properties"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="0dp" android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingStart="12dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="96dp"
+        android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingBottom="100dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/item_property" />
-
-    <TextView
-        android:id="@+id/tv_empty_state"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
-        android:drawablePadding="16dp"
-        android:gravity="center"
-        android:lineSpacingExtra="6dp"
-        android:text="@string/no_properties"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        android:textColor="@color/text_secondary"
-        android:visibility="gone"
-        app:drawableTopCompat="@drawable/ic_home_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_property"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:contentDescription="@string/add_property"
-        app:backgroundTint="@color/brand_primary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_add_24"
-        app:tint="@android:color/white" />
-
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_add_property" android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_margin="18dp" android:minHeight="56dp"
+        android:text="@string/add_property" android:textColor="@color/white" android:textSize="16sp"
+        android:textStyle="bold" android:textAllCaps="false"
+        app:backgroundTint="@color/action_button_background" app:icon="@drawable/ic_add_24"
+        app:iconTint="@color/white" app:iconSize="26dp"
+        app:cornerRadius="30dp"
+        app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

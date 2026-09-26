@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="property_page_background">#151719</color>
+    <color name="property_summary_start">#252E3C</color>
+    <color name="property_summary_end">#23282F</color>
+    <color name="property_filter_selected_background">#343B45</color>
+    <color name="detail_card_background">@color/app_surface</color>
+    <color name="detail_card_outline">@color/outline_soft</color>
+    <color name="detail_icon_background">@color/app_surface_variant</color>
     <color name="brand_primary">#B7C1D3</color>
     <color name="brand_primary_dark">#9FAAC0</color>
+    <color name="action_button_background">#315B98</color>
     <color name="brand_primary_container">#364052</color>
     <color name="brand_secondary">#AABCAE</color>
     <color name="brand_secondary_container">#34453A</color>
@@ -10,6 +18,7 @@
     <color name="app_surface_variant">#272B2F</color>
     <color name="text_primary">#E5E3DE</color>
     <color name="text_secondary">#BEC0C4</color>
+    <color name="overview_secondary">#BEC0C4</color>
     <color name="outline_soft">#44494E</color>
     <color name="status_paid">#A9C3AF</color>
     <color name="status_paid_container">#30463A</color>
@@ -17,4 +26,9 @@
     <color name="status_due_container">#513532</color>
     <color name="status_vacant">#BEC0C4</color>
     <color name="status_vacant_container">#34383C</color>
+    <color name="address_blue">#273D56</color>
+    <color name="address_green">#243A30</color>
+    <color name="icon_green_container">#30463A</color>
+    <color name="icon_orange_container">#4A3722</color>
+    <color name="icon_red_container">#512F36</color>
 </resources>

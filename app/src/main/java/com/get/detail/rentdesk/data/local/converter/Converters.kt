@@ -4,9 +4,19 @@ import androidx.room.TypeConverter
 import com.get.detail.rentdesk.domain.model.TenantInfo
 import com.get.detail.rentdesk.utils.YearMonth
 import com.google.gson.Gson
+import com.get.detail.rentdesk.domain.model.TenantHistoryEntry
+import com.google.gson.reflect.TypeToken
 
 class Converters {
     private val gson = Gson()
+
+    @TypeConverter
+    fun fromTenantHistory(history: List<TenantHistoryEntry>?): String? = history?.let { gson.toJson(it) }
+
+    @TypeConverter
+    fun toTenantHistory(value: String?): List<TenantHistoryEntry>? = value?.let {
+        gson.fromJson(it, object : TypeToken<List<TenantHistoryEntry>>() {}.type)
+    }
 
     @TypeConverter
     fun fromYearMonth(yearMonth: YearMonth?): String? {

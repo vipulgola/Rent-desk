@@ -1,0 +1,76 @@
+<resources>
+    <color name="collection_hero_start">#235DC1</color>
+    <color name="collection_hero_end">#123A83</color>
+    <color name="collection_hero_secondary">#DFEAFF</color>
+    <color name="collection_hero_track">#4A72B6</color>
+    <color name="collection_hero_accent">#95F0CA</color>
+    <color name="collection_hero_icon">#26FFFFFF</color>
+
+    <string name="collection_total_due">Total due</string>
+    <string name="collection_left_to_collect">Left to collect</string>
+    <string name="collection_progress">Dues covered</string>
+    <string name="collection_progress_description">%1$s of dues covered</string>
+    <string name="collection_nothing_due">No dues for this month</string>
+    <string name="collection_all_received">All dues collected</string>
+    <string name="collection_not_started">No payments recorded yet</string>
+    <string name="collection_in_progress">Payments still pending</string>
+    <string name="collection_breakdown_title">This month at a glance</string>
+    <string name="collection_opening_balance">Previous balance</string>
+    <string name="collection_rent">Rent</string>
+    <string name="collection_electricity">Electricity</string>
+    <string name="collection_credit">Advance remaining</string>
+    <string name="collection_estimated">Some amounts are estimated</string>
+    <string name="collection_help_title">How totals work</string>
+    <string name="collection_help_message">A payment for September counts in September, even if you receive it in October.\n\nTotal due includes rent, previous balances and electricity entered with your payments. Security deposits are separate.\n\nIf a bill has not been entered, the saved monthly rent is used. Missing bill details can make some amounts estimates.\n\nA negative previous balance is an advance. Advances reduce what that tenant owes; they do not clear another tenant\'s dues. The progress bar shows how much of the total due has been covered.</string>
+
+    <style name="Widget.RentDesk.CollectionCard" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:theme">@style/ThemeOverlay.RentDesk.PropertyCard</item>
+        <item name="cardBackgroundColor">@color/app_surface</item>
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/outline_soft</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+    <style name="Widget.RentDesk.CollectionLabel" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    <style name="Widget.RentDesk.CollectionAmount" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:maxLines">1</item>
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMinTextSize">14sp</item>
+        <item name="autoSizeMaxTextSize">24sp</item>
+        <item name="autoSizeStepGranularity">1sp</item>
+    </style>
+    <style name="Widget.RentDesk.CollectionRow" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:baselineAligned">false</item>
+    </style>
+    <style name="Widget.RentDesk.CollectionRowLabel" parent="Widget.RentDesk.CollectionLabel">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">12dp</item>
+    </style>
+    <style name="Widget.RentDesk.CollectionRowAmount" parent="Widget.RentDesk.CollectionAmount">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:gravity">end</item>
+        <item name="android:textSize">16sp</item>
+        <item name="autoSizeMaxTextSize">16sp</item>
+    </style>
+</resources>

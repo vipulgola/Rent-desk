@@ -2,11 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_search_properties"
+        android:icon="@drawable/ic_search_24"
+        android:title="@string/search_properties"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+    <item
         android:id="@+id/action_delete_selected"
         android:title="@string/action_delete"
         android:icon="@android:drawable/ic_menu_delete"
         android:visible="false"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_monthly_collection"
+        android:title="@string/monthly_collection"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_edit_mode"
         android:title="@string/action_edit"

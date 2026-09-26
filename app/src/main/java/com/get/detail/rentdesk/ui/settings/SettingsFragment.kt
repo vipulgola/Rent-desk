@@ -1,6 +1,12 @@
 package com.get.detail.rentdesk.ui.settings
 
 import android.app.Activity
+import android.Manifest
+import android.app.TimePickerDialog
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import android.text.format.DateFormat
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,6 +17,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.biometric.BiometricManager
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -28,6 +35,10 @@ import com.get.detail.rentdesk.lock.AppLockSession
 import com.get.detail.rentdesk.lock.LockType
 import com.get.detail.rentdesk.ui.lock.AppLockActivity
 import com.get.detail.rentdesk.utils.SessionManager
+import com.get.detail.rentdesk.notifications.RentReminderNotifications
+import com.get.detail.rentdesk.notifications.RentReminderPreferences
+import com.get.detail.rentdesk.notifications.RentReminderScheduler
+import java.util.Calendar
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.AuthorizationResult
 import com.google.android.gms.auth.api.identity.Identity
@@ -46,6 +57,21 @@ class SettingsFragment : Fragment() {
     private lateinit var autoBackupScheduler: AutoBackupScheduler
     private lateinit var sessionManager: SessionManager
     private var updatingUi = false
+    private var updatingDriveUi = false
+    private var updatingReminderUi = false
+
+    private val notificationPermission = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val context = context ?: return@registerForActivityResult
+        if (granted) {
+            RentReminderScheduler(context).enable()
+        } else {
+            RentReminderScheduler(context).disable()
+            Toast.makeText(context, R.string.rent_reminder_permission_needed, Toast.LENGTH_LONG).show()
+        }
+        refreshReminderUi()
+    }
     private var pendingVerifiedAction: (() -> Unit)? = null
     private var pendingDriveAction: DriveAction? = null
 
@@ -104,16 +130,84 @@ class SettingsFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
         setupAppLockSettings()
         setupDriveSettings()
+        setupReminderSettings()
     }
 
     override fun onResume() {
         super.onResume()
         if (::lockManager.isInitialized) refreshUi()
+        refreshReminderUi()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun setupReminderSettings() {
+        RentReminderNotifications.createChannel(requireContext())
+        binding.switchRentReminders.setOnCheckedChangeListener { _, checked ->
+            if (updatingReminderUi) return@setOnCheckedChangeListener
+            if (!checked) {
+                RentReminderScheduler(requireContext()).disable()
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED) {
+                notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                RentReminderScheduler(requireContext()).enable()
+                if (!RentReminderNotifications.canNotify(requireContext())) openNotificationSettings()
+            }
+            refreshReminderUi()
+        }
+        binding.rowRentReminderTime.setOnClickListener {
+            val preferences = RentReminderPreferences(requireContext())
+            TimePickerDialog(requireContext(), { _, hour, minute ->
+                preferences.setTime(hour, minute)
+                refreshReminderUi()
+            }, preferences.hour, preferences.minute, DateFormat.is24HourFormat(requireContext())).show()
+        }
+        binding.btnRentNotificationSettings.setOnClickListener { openNotificationSettings() }
+        refreshReminderUi()
+    }
+
+    private fun refreshReminderUi() {
+        if (_binding == null) return
+        val preferences = RentReminderPreferences(requireContext())
+        val allowed = RentReminderNotifications.canNotify(requireContext())
+        updatingReminderUi = true
+        binding.switchRentReminders.isChecked = preferences.enabled
+        updatingReminderUi = false
+        val time = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, preferences.hour)
+            set(Calendar.MINUTE, preferences.minute)
+        }
+        val formattedTime = DateFormat.getTimeFormat(requireContext()).format(time.time)
+        binding.tvRentReminderTime.text = getString(R.string.rent_reminder_daily_time, formattedTime)
+        binding.tvRentReminderStatus.setText(when {
+            !allowed -> R.string.rent_reminder_permission_needed
+            preferences.enabled -> R.string.rent_reminder_enabled_summary
+            else -> R.string.rent_reminder_disabled_summary
+        })
+        binding.btnRentNotificationSettings.visibility = if (allowed) View.GONE else View.VISIBLE
+    }
+
+    private fun openNotificationSettings() {
+        val context = requireContext()
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val action = if (androidx.core.app.NotificationManagerCompat.from(context).areNotificationsEnabled()) {
+                Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS
+            } else {
+                Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            }
+            Intent(action)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                .putExtra(Settings.EXTRA_CHANNEL_ID, RentReminderNotifications.CHANNEL_ID)
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                android.net.Uri.parse("package:${context.packageName}"))
+        }
+        startActivity(intent)
     }
 
     private fun setupAppLockSettings() {
@@ -147,26 +241,16 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupDriveSettings() {
+        binding.btnBackupMore.setOnClickListener {
+            val expanded = binding.backupMoreOptions.visibility != View.VISIBLE
+            binding.backupMoreOptions.visibility = if (expanded) View.VISIBLE else View.GONE
+            binding.btnBackupMore.setText(if (expanded) R.string.backup_less else R.string.backup_more)
+        }
         binding.btnConnectDrive.setOnClickListener { authorizeDrive(DriveAction.CONNECT) }
         binding.btnBackupNow.setOnClickListener { authorizeDrive(DriveAction.BACKUP) }
-        binding.btnAutomaticBackup.setOnClickListener {
-            val connected = drivePreferences.connectedEmail.equals(
-                BuildConfig.DRIVE_BACKUP_ACCOUNT,
-                ignoreCase = true
-            )
-            if (!connected) {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.automatic_backup_requires_drive,
-                    Toast.LENGTH_LONG
-                ).show()
-            } else if (drivePreferences.automaticBackupEnabled) {
-                autoBackupScheduler.disable()
-                refreshDriveUi()
-            } else {
-                autoBackupScheduler.enable()
-                refreshDriveUi()
-            }
+        binding.btnAutomaticBackup.setOnClickListener { toggleAutomaticBackup() }
+        binding.switchDriveBackup.setOnCheckedChangeListener { _, _ ->
+            if (!updatingDriveUi) toggleAutomaticBackup()
         }
         binding.btnRestoreBackup.setOnClickListener { authorizeDrive(DriveAction.RESTORE) }
         binding.btnExportReadable.setOnClickListener { authorizeDrive(DriveAction.EXPORT) }
@@ -184,6 +268,20 @@ class SettingsFragment : Fragment() {
         androidx.work.WorkManager.getInstance(requireContext())
             .getWorkInfosForUniqueWorkLiveData(AutoBackupScheduler.UNIQUE_WORK_NAME)
             .observe(viewLifecycleOwner) { refreshDriveUi() }
+    }
+
+    private fun toggleAutomaticBackup() {
+        val connected = drivePreferences.connectedEmail.equals(
+            BuildConfig.DRIVE_BACKUP_ACCOUNT, ignoreCase = true
+        )
+        if (!connected) {
+            authorizeDrive(DriveAction.ENABLE_AUTOMATIC)
+        } else if (drivePreferences.automaticBackupEnabled) {
+            autoBackupScheduler.disable()
+        } else {
+            autoBackupScheduler.enable()
+        }
+        refreshDriveUi()
     }
 
     private fun refreshUi() {
@@ -214,6 +312,9 @@ class SettingsFragment : Fragment() {
         if (_binding == null) return
         val connectedEmail = drivePreferences.connectedEmail
         val connected = connectedEmail.equals(BuildConfig.DRIVE_BACKUP_ACCOUNT, ignoreCase = true)
+        updatingDriveUi = true
+        binding.switchDriveBackup.isChecked = connected && drivePreferences.automaticBackupEnabled
+        updatingDriveUi = false
         binding.tvDriveAccount.text = if (connected) {
             getString(R.string.connected_drive_account, connectedEmail)
         } else {
@@ -227,7 +328,7 @@ class SettingsFragment : Fragment() {
             getString(R.string.last_backup, it)
         } ?: getString(R.string.no_backup_yet)
         binding.btnConnectDrive.visibility = if (connected) View.GONE else View.VISIBLE
-        binding.btnBackupNow.isEnabled = connected
+        binding.btnBackupNow.isEnabled = true
         binding.btnAutomaticBackup.isEnabled = connected
         binding.btnAutomaticBackup.setText(
             if (drivePreferences.automaticBackupEnabled) {
@@ -237,7 +338,7 @@ class SettingsFragment : Fragment() {
             }
         )
         binding.tvAutomaticBackupStatus.text = automaticBackupStatusText()
-        binding.btnRestoreBackup.isEnabled = connected
+        binding.btnRestoreBackup.isEnabled = true
         binding.btnExportReadable.isEnabled = connected
         binding.btnDisconnectDrive.visibility = if (connected) View.VISIBLE else View.GONE
     }
@@ -252,7 +353,7 @@ class SettingsFragment : Fragment() {
                     Scope(Scopes.DRIVE_FILE)
                 )
             )
-        if (action == DriveAction.CONNECT) {
+        if (action == DriveAction.CONNECT || action == DriveAction.ENABLE_AUTOMATIC) {
             requestBuilder.setPrompt(AuthorizationRequest.Prompt.SELECT_ACCOUNT)
         }
         val request = requestBuilder.build()
@@ -313,6 +414,10 @@ class SettingsFragment : Fragment() {
                     DriveAction.CONNECT -> {
                         setDriveBusy(false)
                         Toast.makeText(requireContext(), R.string.drive_connected, Toast.LENGTH_SHORT).show()
+                    }
+                    DriveAction.ENABLE_AUTOMATIC -> {
+                        autoBackupScheduler.enable()
+                        setDriveBusy(false)
                     }
                     DriveAction.BACKUP -> checkBeforeBackup(client)
                     DriveAction.RESTORE -> loadBackupChoices(client)
@@ -394,23 +499,33 @@ class SettingsFragment : Fragment() {
                     localBackupManager.parseAndValidate(client.download(file.id))
                 }
                 setDriveBusy(false)
-                val counts = backup.data.recordCounts
-                AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.restore_confirmation_title)
-                    .setMessage(
-                        getString(
-                            R.string.restore_confirmation_message,
-                            backup.data.createdAtUtc,
-                            backup.data.updatedByMobile,
-                            backup.data.sourceDevice,
-                            counts.addresses,
-                            counts.properties,
-                            counts.transactions
-                        )
-                    )
-                    .setPositiveButton(R.string.restore) { _, _ -> restoreBackup(file, backup) }
-                    .setNegativeButton(R.string.cancel, null)
-                    .show()
+                val current = withContext(Dispatchers.IO) {
+                    localBackupManager.createBackup(sessionManager.getMobileNumber().orEmpty())
+                }
+                val preview = com.get.detail.rentdesk.databinding.DialogRestorePreviewBinding.inflate(layoutInflater)
+                preview.tvRestoreSource.text = getString(R.string.restore_preview_source,
+                    backup.data.createdAtUtc, backup.data.sourceDevice, backup.data.updatedByMobile)
+                fun totals(data: com.get.detail.rentdesk.backup.BackupData): String {
+                    val tenants = data.properties.mapNotNull { it.tenantInfo } +
+                        data.properties.flatMap { it.tenantHistory.orEmpty().map { entry -> entry.tenant } }
+                    val held = tenants.sumOf { it.depositReceived - it.depositDeductions - it.depositRefunded }
+                    return getString(R.string.restore_preview_counts, data.recordCounts.addresses,
+                        data.recordCounts.properties, data.recordCounts.transactions,
+                        data.properties.count { it.tenantInfo != null },
+                        data.properties.sumOf { it.tenantHistory.orEmpty().size },
+                        java.text.NumberFormat.getCurrencyInstance(java.util.Locale("en", "IN")).format(held))
+                }
+                preview.tvRestoreCurrent.text = totals(current.data)
+                preview.tvRestoreBackup.text = totals(backup.data)
+                val payments = backup.data.transactions.filterNot { it.isDeleted }
+                preview.tvRestoreDates.text = if (payments.isEmpty()) getString(R.string.no_history_payments)
+                    else getString(R.string.restore_preview_dates,
+                        com.get.detail.rentdesk.utils.PaymentDateUtils.format(payments.minOf { it.paymentDateUtc }),
+                        com.get.detail.rentdesk.utils.PaymentDateUtils.format(payments.maxOf { it.paymentDateUtc }))
+                AlertDialog.Builder(requireContext()).setTitle(R.string.restore_preview_title)
+                    .setView(preview.root)
+                    .setPositiveButton(R.string.restore_this_backup) { _, _ -> restoreBackup(file, backup) }
+                    .setNegativeButton(R.string.cancel, null).show()
             } catch (error: Exception) {
                 showDriveError(error)
             } finally {
@@ -472,9 +587,10 @@ class SettingsFragment : Fragment() {
         if (_binding == null) return
         binding.progressDrive.visibility = if (busy) View.VISIBLE else View.GONE
         binding.btnConnectDrive.isEnabled = !busy
-        binding.btnBackupNow.isEnabled = !busy && drivePreferences.connectedEmail != null
+        binding.btnBackupNow.isEnabled = !busy
+        binding.btnBackupMore.isEnabled = !busy
         binding.btnAutomaticBackup.isEnabled = !busy && drivePreferences.connectedEmail != null
-        binding.btnRestoreBackup.isEnabled = !busy && drivePreferences.connectedEmail != null
+        binding.btnRestoreBackup.isEnabled = !busy
         binding.btnExportReadable.isEnabled = !busy && drivePreferences.connectedEmail != null
         binding.btnDisconnectDrive.isEnabled = !busy
     }
@@ -556,6 +672,7 @@ class SettingsFragment : Fragment() {
 
     private enum class DriveAction {
         CONNECT,
+        ENABLE_AUTOMATIC,
         BACKUP,
         RESTORE,
         EXPORT

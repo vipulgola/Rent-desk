@@ -1,4 +1,18 @@
 <resources>
+    <style name="Widget.RentDesk.PropertyFilter" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginHorizontal">2dp</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:padding">6dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/bg_property_filter</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:importantForAccessibility">yes</item>
+    </style>
     <style name="ThemeOverlay.RentDesk.PropertyCard" parent="">
         <item name="elevationOverlayEnabled">false</item>
     </style>

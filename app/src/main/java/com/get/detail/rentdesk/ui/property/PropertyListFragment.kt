@@ -53,6 +53,7 @@ class PropertyListFragment : Fragment() {
     private var visibleProperties: List<PropertyTenantInfo> = emptyList()
     private var visibleTransactions: List<com.get.detail.rentdesk.data.local.entity.RecordTransaction> = emptyList()
     private var searchQuery = ""
+    private var propertyFilter = PropertyFilter.ALL
     private var pendingExportData: String? = null
 
     private val createCsvFile = registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
@@ -65,6 +66,9 @@ class PropertyListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        propertyFilter = PropertyFilter.values().firstOrNull {
+            it.name == savedInstanceState?.getString("propertyFilter")
+        } ?: PropertyFilter.ALL
         
         requireActivity().onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -111,8 +115,16 @@ class PropertyListFragment : Fragment() {
                 binding.fabAddProperty.visibility = if (isSelectionMode) View.GONE else View.VISIBLE
             }
         )
-        summaryAdapter = PropertySummaryAdapter()
+        summaryAdapter = PropertySummaryAdapter { filter ->
+            if (propertyFilter != filter) {
+                propertyFilter = filter
+                if (adapter.isSelectionMode) adapter.isSelectionMode = false
+                applyFilters()
+                binding.rvProperties.scrollToPosition(0)
+            }
+        }
         binding.rvProperties.adapter = ConcatAdapter(summaryAdapter, adapter)
+        summaryAdapter.update(visibleProperties.size, visibleProperties.count { it.tenantInfo != null }, propertyFilter)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -139,8 +151,7 @@ class PropertyListFragment : Fragment() {
                     )
                     visibleProperties = sortedProperties
                     visibleTransactions = transactions
-                    summaryAdapter.update(visibleProperties.size, visibleProperties.count { it.tenantInfo != null })
-                    applySearch()
+                    applyFilters()
                 }
             }
         }
@@ -165,7 +176,7 @@ class PropertyListFragment : Fragment() {
                         override fun onQueryTextSubmit(query: String?) = false
                         override fun onQueryTextChange(query: String?): Boolean {
                             searchQuery = query.orEmpty()
-                            applySearch()
+                            applyFilters()
                             return true
                         }
                     })
@@ -223,16 +234,28 @@ class PropertyListFragment : Fragment() {
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-    private fun applySearch() {
-        if (::adapter.isInitialized) {
-            val matches = visibleProperties.filter {
+    private fun applyFilters() {
+        if (::adapter.isInitialized && ::summaryAdapter.isInitialized && _binding != null) {
+            val filteredProperties = visibleProperties.filter { property ->
+                when (propertyFilter) {
+                    PropertyFilter.ALL -> true
+                    PropertyFilter.OCCUPIED -> property.tenantInfo != null
+                    PropertyFilter.VACANT -> property.tenantInfo == null
+                }
+            }
+            val matches = filteredProperties.filter {
                 it.entityName.contains(searchQuery, ignoreCase = true) ||
                     it.tenantInfo?.name?.contains(searchQuery, ignoreCase = true) == true
             }
             adapter.updateData(matches, visibleTransactions)
+            summaryAdapter.update(visibleProperties.size, visibleProperties.count { it.tenantInfo != null }, propertyFilter)
             summaryAdapter.setEmptyState(
                 if (matches.isNotEmpty()) null
                 else if (visibleProperties.isEmpty()) R.string.no_properties
+                else if (filteredProperties.isEmpty() && propertyFilter == PropertyFilter.OCCUPIED)
+                    R.string.no_occupied_properties
+                else if (filteredProperties.isEmpty() && propertyFilter == PropertyFilter.VACANT)
+                    R.string.no_vacant_properties
                 else R.string.no_matching_properties
             )
         }
@@ -300,6 +323,11 @@ class PropertyListFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("propertyFilter", propertyFilter.name)
     }
 
     override fun onDestroyView() {

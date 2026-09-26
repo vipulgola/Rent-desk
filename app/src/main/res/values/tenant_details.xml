@@ -1,0 +1,56 @@
+<resources>
+    <color name="tenant_detail_page">@color/property_page_background</color>
+    <color name="tenant_detail_surface">@color/app_surface</color>
+    <color name="tenant_detail_outline">@color/outline_soft</color>
+    <color name="tenant_detail_title">@color/text_primary</color>
+    <color name="tenant_detail_secondary">@color/overview_secondary</color>
+    <color name="tenant_detail_header_start">@color/app_surface</color>
+    <color name="tenant_detail_header_end">@color/app_surface</color>
+    <color name="tenant_detail_header_outline">@color/outline_soft</color>
+    <color name="tenant_detail_avatar_background">#DDEBFF</color>
+    <color name="tenant_detail_avatar_text">#155BCD</color>
+    <color name="tenant_detail_active_background">#DDF8EB</color>
+    <color name="tenant_detail_active_text">#006E4F</color>
+    <color name="tenant_detail_active_dot">#15975F</color>
+    <color name="tenant_detail_active_outline">#DDF8EB</color>
+    <color name="tenant_detail_blue_icon">#1D69D5</color>
+    <color name="tenant_detail_blue_background">#EEF5FF</color>
+    <color name="tenant_detail_orange_icon">#BD6900</color>
+    <color name="tenant_detail_orange_background">#FFF6E8</color>
+    <color name="tenant_detail_green_icon">#008675</color>
+    <color name="tenant_detail_green_background">#E7FAF4</color>
+    <color name="tenant_detail_purple_icon">#5141C6</color>
+    <color name="tenant_detail_purple_background">#F2EFFF</color>
+    <color name="tenant_detail_history_background">@color/app_surface</color>
+    <color name="tenant_detail_history_end">@color/app_surface</color>
+    <color name="tenant_detail_history_text">@color/brand_primary</color>
+    <color name="tenant_detail_history_outline">@color/outline_soft</color>
+    <color name="tenant_detail_deposit_background">@color/app_surface</color>
+    <color name="tenant_detail_deposit_text">@color/brand_primary</color>
+    <color name="tenant_detail_deposit_outline">@color/outline_soft</color>
+    <color name="tenant_detail_vacate_background">@color/app_surface</color>
+    <color name="tenant_detail_vacate_text">#C11F33</color>
+    <color name="tenant_detail_vacate_outline">#E34C5C</color>
+
+    <string name="tenant_edit_field_description">Edit %1$s: %2$s</string>
+
+    <style name="Widget.RentDesk.TenantDetailCard" parent="">
+        <item name="cardBackgroundColor">@color/tenant_detail_surface</item>
+        <item name="cardForegroundColor">@android:color/transparent</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/tenant_detail_outline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="rippleColor">?attr/colorControlHighlight</item>
+    </style>
+    <style name="Widget.RentDesk.TenantDetailAction" parent="Widget.RentDesk.TenantDetailCard">
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="cardCornerRadius">14dp</item>
+    </style>
+    <style name="TextAppearance.RentDesk.TenantDetailToolbar" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/tenant_detail_title</item>
+    </style>
+</resources>

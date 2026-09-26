@@ -3,6 +3,10 @@
     <color name="property_page_background">#FAF9F7</color>
     <color name="property_summary_start">#F2F7FD</color>
     <color name="property_summary_end">#F8FBFF</color>
+    <color name="property_filter_selected_background">#E1ECFA</color>
+    <color name="detail_card_background">@color/address_blue</color>
+    <color name="detail_card_outline">@android:color/transparent</color>
+    <color name="detail_icon_background">@color/brand_primary_container</color>
     <color name="brand_primary">#2057B4</color>
     <color name="brand_primary_dark">#164590</color>
     <color name="action_button_background">#2057B4</color>

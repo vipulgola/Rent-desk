@@ -2,11 +2,13 @@ package com.get.detail.rentdesk.ui.tenant
 
 import android.os.Bundle
 import android.app.DatePickerDialog
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -89,9 +91,6 @@ class TenantDetailsFragment : Fragment() {
                         renderSummary(property)
                     }
                     updateMode(property?.tenantInfo != null)
-                    binding.btnSecurityDeposit.visibility = if (property?.tenantInfo != null) View.VISIBLE else View.GONE
-                    binding.btnVacateProperty.visibility =
-                        if (property?.tenantInfo != null) View.VISIBLE else View.GONE
                     property?.let {
                         binding.etMonthlyRent.setText(
                             it.monthlyRent.takeIf { value -> value > 0 }?.toString().orEmpty()
@@ -214,6 +213,9 @@ class TenantDetailsFragment : Fragment() {
         binding.tenantSummary.visibility = if (hasTenant && !isEditing) View.VISIBLE else View.GONE
         binding.tenantEditForm.visibility = if (!hasTenant || isEditing) View.VISIBLE else View.GONE
         binding.btnCancelEdit.visibility = if (hasTenant && isEditing) View.VISIBLE else View.GONE
+        binding.tenantActions.visibility = if (isEditing) View.GONE else View.VISIBLE
+        binding.btnSecurityDeposit.visibility = if (hasTenant) View.VISIBLE else View.GONE
+        binding.btnVacateProperty.visibility = if (hasTenant) View.VISIBLE else View.GONE
     }
 
     private fun renderSummary(property: PropertyTenantInfo) {
@@ -243,11 +245,13 @@ class TenantDetailsFragment : Fragment() {
                 R.drawable.ic_receipt_24, binding.etMonthlyRent),
             SummaryField(R.string.electricity_price_per_unit,
                 price.format(property.electricityPricePerUnit), R.drawable.ic_bolt_24,
-                binding.etElectricityPrice),
+                binding.etElectricityPrice, R.color.tenant_detail_orange_icon, R.color.tenant_detail_orange_background),
             SummaryField(R.string.mobile_number, tenant.mobileNumber,
-                R.drawable.ic_phone_24, binding.etMobileNumber),
+                R.drawable.ic_phone_24, binding.etMobileNumber,
+                R.color.tenant_detail_green_icon, R.color.tenant_detail_green_background),
             SummaryField(R.string.aadhaar_number, maskedAadhaar,
-                R.drawable.ic_receipt_24, binding.etAadhaarNumber),
+                R.drawable.ic_receipt_24, binding.etAadhaarNumber,
+                R.color.tenant_detail_purple_icon, R.color.tenant_detail_purple_background),
             SummaryField(R.string.address, tenant.address,
                 R.drawable.ic_location_24, binding.etAddress)
         )
@@ -255,8 +259,15 @@ class TenantDetailsFragment : Fragment() {
         details.forEach { field ->
             val row = ItemTenantSummaryBinding.inflate(layoutInflater, binding.summaryRows, false)
             row.ivRowIcon.setImageResource(field.icon)
+            row.ivRowIcon.setColorFilter(ContextCompat.getColor(requireContext(), field.iconTint))
+            row.ivRowIcon.backgroundTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), field.iconBackground)
+            )
             row.tvRowLabel.setText(field.label)
             row.tvRowValue.text = field.value
+            row.root.contentDescription = getString(
+                R.string.tenant_edit_field_description, getString(field.label), field.value
+            )
             row.root.setOnClickListener {
                 isEditing = true
                 updateMode(true)
@@ -270,7 +281,9 @@ class TenantDetailsFragment : Fragment() {
         val label: Int,
         val value: String,
         val icon: Int,
-        val focus: View
+        val focus: View,
+        val iconTint: Int = R.color.tenant_detail_blue_icon,
+        val iconBackground: Int = R.color.tenant_detail_blue_background
     )
 
     private fun formatElectricityPrice(value: Double): String = when {

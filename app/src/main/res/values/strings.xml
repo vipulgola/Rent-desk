@@ -1,6 +1,7 @@
 <resources>
     <string name="property_summary_properties">Properties</string>
     <string name="property_summary_occupied">Occupied</string>
+    <string name="property_filter_description">%1$s %2$s</string>
     <string name="property_expected_rent">Expected Rent</string>
     <string name="property_monthly_rent">Monthly Rent</string>
     <string name="property_pending_since">Pending since</string>
@@ -38,6 +39,8 @@
     <string name="no_matching_addresses">No matching addresses</string>
     <string name="no_properties">No properties here yet\nTap + to add a property</string>
     <string name="no_matching_properties">No matching properties</string>
+    <string name="no_occupied_properties">No occupied properties here</string>
+    <string name="no_vacant_properties">No vacant properties here</string>
     <string name="no_transactions">No transactions yet\nTap + to record a payment</string>
     <string name="add_address">Add address</string>
     <string name="edit_address">Edit address</string>

@@ -1,9 +1,9 @@
 <resources>
-    <color name="address_page_background">#15191F</color>
+    <color name="address_page_background">@color/property_page_background</color>
     <color name="address_action_background">#315B98</color>
-    <color name="address_heading">#E5ECFC</color>
-    <color name="address_card_outline">#353E4D</color>
-    <color name="address_active_outline">#425D83</color>
+    <color name="address_heading">@color/text_primary</color>
+    <color name="address_card_outline">@color/outline_soft</color>
+    <color name="address_active_outline">@color/outline_soft</color>
     <color name="address_location_icon">#B0CBFF</color>
     <color name="address_location_background">#263D60</color>
     <color name="address_property_icon">#CCC2FF</color>

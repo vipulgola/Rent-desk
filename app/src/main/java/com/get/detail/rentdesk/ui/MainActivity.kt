@@ -47,17 +47,34 @@ class MainActivity : AppCompatActivity() {
             supportActionBar?.subtitle = null
             val isPropertyList = destination.id == R.id.propertyListFragment
             val isAddressList = destination.id == R.id.addressListFragment
+            val isPropertyDetails = destination.id == R.id.propertyDetailsFragment
+            val isTenantDetails = destination.id == R.id.tenantDetailsFragment
             val toolbarColor = ContextCompat.getColor(this, when {
                 isAddressList -> R.color.address_page_background
                 isPropertyList -> R.color.property_page_background
+                isPropertyDetails -> R.color.property_detail_page
+                isTenantDetails -> R.color.tenant_detail_page
                 else -> R.color.app_surface
             })
             binding.toolbar.setBackgroundColor(toolbarColor)
+            binding.root.setBackgroundColor(toolbarColor)
             (binding.toolbar.parent as android.view.View).setBackgroundColor(toolbarColor)
-            binding.toolbar.setTitleTextAppearance(this, if (isAddressList)
-                R.style.TextAppearance_RentDesk_AddressToolbar else com.google.android.material.R.style.TextAppearance_Material3_TitleMedium)
-            binding.toolbar.setTitleTextColor(ContextCompat.getColor(this, if (isAddressList)
-                R.color.address_heading else R.color.text_primary))
+            binding.toolbar.setTitleTextAppearance(this, when {
+                isAddressList -> R.style.TextAppearance_RentDesk_AddressToolbar
+                isPropertyDetails -> R.style.TextAppearance_RentDesk_PropertyDetailToolbar
+                isTenantDetails -> R.style.TextAppearance_RentDesk_TenantDetailToolbar
+                else -> com.google.android.material.R.style.TextAppearance_Material3_TitleMedium
+            })
+            binding.toolbar.setTitleTextColor(ContextCompat.getColor(this, when {
+                isAddressList -> R.color.address_heading
+                isPropertyDetails -> R.color.property_detail_title
+                isTenantDetails -> R.color.tenant_detail_title
+                else -> R.color.text_primary
+            }))
+            binding.toolbar.setSubtitleTextAppearance(this, if (isPropertyDetails)
+                R.style.TextAppearance_RentDesk_PropertyDetailSubtitle else R.style.TextAppearance_RentDesk_ToolbarSubtitle)
+            binding.toolbar.setSubtitleTextColor(ContextCompat.getColor(this, if (isPropertyDetails)
+                R.color.property_detail_secondary else R.color.text_secondary))
             invalidateOptionsMenu()
         }
     }

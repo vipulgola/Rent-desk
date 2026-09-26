@@ -1,58 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.RentDesk.TenantDetailCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="7dp"
+    android:layout_marginBottom="8dp"
+    android:theme="@style/ThemeOverlay.RentDesk.PropertyCard"
     android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/app_surface"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="0dp"
-    app:strokeColor="@color/outline_soft"
-    app:strokeWidth="1dp">
+    android:focusable="true">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="wrap_content"
+        android:minHeight="68dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="12dp">
-        <ImageView
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="10dp">
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_row_icon"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:background="@drawable/bg_icon_container"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:background="@drawable/bg_tenant_field_icon"
             android:contentDescription="@null"
-            android:padding="9dp"
-            android:src="@drawable/ic_calendar_24" />
+            android:padding="10dp"
+            app:srcCompat="@drawable/ic_calendar_24" />
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="1"
             android:orientation="vertical">
             <TextView
                 android:id="@+id/tv_row_label"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-                android:textColor="@color/text_secondary" />
+                android:textColor="@color/tenant_detail_secondary"
+                android:textSize="13sp"
+                tools:text="Date of joining" />
             <TextView
                 android:id="@+id/tv_row_value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold" />
+                android:layout_marginTop="3dp"
+                android:textColor="@color/tenant_detail_title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                tools:text="22/08/2026" />
         </LinearLayout>
-        <ImageView
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:contentDescription="@string/action_edit"
-            android:src="@drawable/ic_edit_24"
-            app:tint="@color/text_secondary" />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:contentDescription="@null"
+            app:srcCompat="@drawable/ic_edit_24"
+            app:tint="@color/tenant_detail_secondary" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

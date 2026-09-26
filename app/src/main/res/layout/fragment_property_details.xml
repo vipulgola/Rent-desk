@@ -1,201 +1,369 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/property_detail_page"
+    android:clipToPadding="false"
     android:fillViewport="true"
-    android:background="@color/app_background">
+    android:theme="@style/ThemeOverlay.RentDesk.PropertyCard">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="18dp">
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
+
         <com.google.android.material.card.MaterialCardView
+            style="@style/Widget.RentDesk.PropertyDetailCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/address_blue"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="0dp">
-            <LinearLayout
+            android:clipToOutline="true"
+            app:cardBackgroundColor="@color/property_detail_hero_start"
+            app:strokeColor="@color/property_detail_hero_outline">
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="16dp">
+                android:background="@drawable/bg_property_detail_overview">
                 <ImageView
-                    android:layout_width="54dp"
-                    android:layout_height="54dp"
-                    android:background="@drawable/bg_icon_container"
+                    android:layout_width="132dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="bottom|end"
                     android:contentDescription="@null"
-                    android:padding="13dp"
-                    android:src="@drawable/ic_home_24" />
-                <LinearLayout
-                    android:layout_width="0dp"
+                    android:importantForAccessibility="no"
+                    android:scaleType="fitEnd"
+                    android:src="@drawable/ill_property_detail_houses" />
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/tv_overview_property_name"
-                        android:layout_width="match_parent"
+                    android:minHeight="120dp"
+                    android:padding="16dp">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_overview_property"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:background="@drawable/bg_property_detail_home"
+                        android:contentDescription="@null"
+                        android:padding="12dp"
+                        app:srcCompat="@drawable/ic_home_24"
+                        app:tint="@color/property_detail_accent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+                    <View
+                        android:id="@+id/overview_divider"
+                        android:layout_width="1dp"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="12dp"
+                        android:background="@color/property_detail_hero_outline"
+                        app:layout_constraintStart_toEndOf="@id/iv_overview_property"
+                        app:layout_constraintTop_toTopOf="@id/overview_content"
+                        app:layout_constraintBottom_toBottomOf="@id/overview_content" />
+                    <LinearLayout
+                        android:id="@+id/overview_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
-                    <TextView
-                        android:id="@+id/tv_overview_rent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/overview_secondary" />
-                    <TextView
-                        android:id="@+id/tv_overview_due"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/overview_secondary" />
-                </LinearLayout>
-                <TextView
-                    android:id="@+id/tv_overview_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical"
+                        app:layout_constraintStart_toEndOf="@id/overview_divider"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/tv_overview_property_name"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="8dp"
+                                android:layout_weight="1"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:textColor="@color/property_detail_title"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                tools:text="Room 2" />
+                            <TextView
+                                android:id="@+id/tv_overview_status"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:minWidth="48dp"
+                                android:gravity="center"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                tools:text="Due" />
+                        </LinearLayout>
+                        <TextView
+                            android:id="@+id/tv_overview_rent"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:textColor="@color/property_detail_secondary"
+                            android:textSize="16sp"
+                            tools:text="₹2,000 / month" />
+                        <LinearLayout
+                            android:id="@+id/overview_due_row"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+                            <androidx.appcompat.widget.AppCompatImageView
+                                android:layout_width="18dp"
+                                android:layout_height="20dp"
+                                android:contentDescription="@null"
+                                app:srcCompat="@drawable/ic_calendar_24"
+                                app:tint="@color/property_detail_secondary" />
+                            <TextView
+                                android:id="@+id/tv_overview_due"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="7dp"
+                                android:layout_weight="1"
+                                android:textColor="@color/property_detail_secondary"
+                                android:textSize="14sp"
+                                tools:text="Due on 22 Sept 2026" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="12dp"
             android:text="@string/tenant"
-            android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/property_detail_title"
+            android:textSize="20sp"
             android:textStyle="bold" />
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_tenant"
+            style="@style/Widget.RentDesk.PropertyDetailCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            app:cardBackgroundColor="@color/app_surface"
-            app:cardCornerRadius="18dp"
-            app:cardElevation="0dp"
-            app:strokeColor="@color/outline_soft"
-            app:strokeWidth="1dp">
+            android:focusable="true">
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="70dp"
+                android:layout_height="wrap_content"
+                android:minHeight="76dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="14dp">
+                android:padding="14dp">
                 <TextView
                     android:id="@+id/tv_tenant_initial"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_icon_container"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_address_circle"
+                    android:backgroundTint="@color/property_detail_avatar_background"
                     android:gravity="center"
-                    android:textColor="@color/brand_primary"
-                    android:textSize="20sp"
-                    android:textStyle="bold" />
+                    android:importantForAccessibility="no"
+                    android:textColor="@color/property_detail_accent"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    tools:text="S" />
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
                         android:id="@+id/tv_tenant_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleSmall"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
+                        android:textColor="@color/property_detail_title"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        tools:text="sunil" />
                     <TextView
                         android:id="@+id/tv_tenant_phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"
-                        android:textColor="@color/text_secondary" />
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/property_detail_secondary"
+                        android:textSize="15sp"
+                        tools:text="6464949499" />
                 </LinearLayout>
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_chevron_right_24" />
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="@color/property_detail_secondary" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
+            android:layout_marginTop="16dp"
+            android:baselineAligned="false"
             android:orientation="horizontal">
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_view_transactions"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_marginEnd="6dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/address_blue"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="0dp">
-                <LinearLayout
+                style="@style/Widget.RentDesk.PropertyDetailActionCard"
+                android:layout_marginEnd="6dp">
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="140dp"
+                    android:padding="12dp">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_transactions_icon"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_address_circle"
+                        android:backgroundTint="@color/property_detail_icon_background"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_receipt_24" />
+                        android:padding="10dp"
+                        app:srcCompat="@drawable/ic_receipt_24"
+                        app:tint="@color/property_detail_accent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tv_transactions_action"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="4dp"
                         android:text="@string/view_transactions"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                        android:textColor="@color/property_detail_title"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/iv_transactions_chevron"
+                        app:layout_constraintTop_toBottomOf="@id/iv_transactions_icon" />
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_transactions_chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@null"
+                        app:srcCompat="@drawable/ic_chevron_right_24"
+                        app:tint="@color/property_detail_secondary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/tv_transactions_action"
+                        app:layout_constraintBottom_toBottomOf="@id/tv_transactions_action" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/property_detail_transactions_description"
+                        android:textColor="@color/property_detail_secondary"
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_transactions_action"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_edit_property"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_marginStart="6dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                app:cardBackgroundColor="@color/address_blue"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="0dp">
-                <LinearLayout
+                style="@style/Widget.RentDesk.PropertyDetailActionCard"
+                android:layout_marginStart="6dp">
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical">
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="140dp"
+                    android:padding="12dp">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_edit_property_icon"
+                        android:layout_width="42dp"
+                        android:layout_height="42dp"
+                        android:background="@drawable/bg_address_circle"
+                        android:backgroundTint="@color/property_detail_edit_background"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_edit_24" />
+                        android:padding="10dp"
+                        app:srcCompat="@drawable/ic_edit_24"
+                        app:tint="@color/property_detail_edit_icon"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tv_edit_property_action"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="4dp"
                         android:text="@string/edit_property"
-                        android:textColor="@color/text_primary"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                        android:textColor="@color/property_detail_title"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/iv_edit_property_chevron"
+                        app:layout_constraintTop_toBottomOf="@id/iv_edit_property_icon" />
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_edit_property_chevron"
+                        android:layout_width="18dp"
+                        android:layout_height="22dp"
+                        android:contentDescription="@null"
+                        app:srcCompat="@drawable/ic_chevron_right_24"
+                        app:tint="@color/property_detail_secondary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/tv_edit_property_action"
+                        app:layout_constraintBottom_toBottomOf="@id/tv_edit_property_action" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:text="@string/property_detail_edit_description"
+                        android:textColor="@color/property_detail_secondary"
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_edit_property_action"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
-<com.google.android.material.button.MaterialButton android:id="@+id/btn_tenant_history" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/tenant_history" android:layout_marginTop="12dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/btn_tenant_history"
+            style="@style/Widget.RentDesk.PropertyDetailCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="@color/property_detail_history_background"
+            app:strokeColor="@color/property_detail_history_outline">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="56dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="18dp"
+                android:paddingVertical="14dp">
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/ic_tenant_history_24"
+                    app:tint="@color/property_detail_accent" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="14dp"
+                    android:layout_weight="1"
+                    android:text="@string/tenant_history"
+                    android:textColor="@color/property_detail_accent"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="22dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="@color/property_detail_accent" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
 </ScrollView>

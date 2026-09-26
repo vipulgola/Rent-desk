@@ -2,27 +2,27 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
     <ImageView android:layout_width="240dp" android:layout_height="64dp" android:layout_gravity="end" android:contentDescription="@null" android:importantForAccessibility="no" android:scaleType="fitEnd" android:src="@drawable/ill_property_neighborhood" />
     <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="2dp" android:layout_marginBottom="12dp" app:cardBackgroundColor="@color/app_surface" app:cardCornerRadius="18dp" app:cardElevation="0dp" app:strokeWidth="0dp">
-        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="7dp" android:background="@drawable/bg_property_summary" android:gravity="center_vertical" android:orientation="horizontal" android:paddingVertical="9dp">
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_margin="7dp" android:background="@drawable/bg_property_summary" android:gravity="center_vertical" android:orientation="horizontal" android:padding="4dp">
+            <LinearLayout android:id="@+id/filter_all" style="@style/Widget.RentDesk.PropertyFilter">
                 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
                     <androidx.appcompat.widget.AppCompatImageView android:layout_width="24dp" android:layout_height="24dp" android:contentDescription="@null" app:srcCompat="@drawable/ic_property_building" app:tint="@color/brand_primary" />
                     <TextView android:id="@+id/tv_total_properties" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/text_primary" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="@string/property_summary_properties" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="@string/property_summary_properties" android:textSize="12sp" android:textColor="@color/overview_secondary" />
             </LinearLayout>
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+            <LinearLayout android:id="@+id/filter_occupied" style="@style/Widget.RentDesk.PropertyFilter">
                 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
                     <androidx.appcompat.widget.AppCompatImageView android:layout_width="24dp" android:layout_height="24dp" android:contentDescription="@null" app:srcCompat="@drawable/ic_property_occupied" app:tint="@color/status_paid" />
                     <TextView android:id="@+id/tv_occupied_properties" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/text_primary" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="@string/property_summary_occupied" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="@string/property_summary_occupied" android:textSize="12sp" android:textColor="@color/overview_secondary" />
             </LinearLayout>
-            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:orientation="vertical" android:padding="6dp">
+            <LinearLayout android:id="@+id/filter_vacant" style="@style/Widget.RentDesk.PropertyFilter">
                 <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
                     <androidx.appcompat.widget.AppCompatImageView android:layout_width="24dp" android:layout_height="24dp" android:contentDescription="@null" app:srcCompat="@drawable/ic_home_24" app:tint="@color/status_vacant" />
                     <TextView android:id="@+id/tv_vacant_properties" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="6dp" android:textSize="20sp" android:textStyle="bold" android:textColor="@color/text_primary" />
                 </LinearLayout>
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="@string/payment_vacant" android:textSize="12sp" android:textColor="@color/text_secondary" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center" android:text="@string/payment_vacant" android:textSize="12sp" android:textColor="@color/overview_secondary" />
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

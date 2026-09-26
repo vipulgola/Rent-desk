@@ -61,6 +61,7 @@
     <string name="calculate_before_receiving">Calculate the total before recording payment</string>
     <string name="amount_received">Amount received</string>
     <string name="bill_breakdown">Electricity: (%1$d - %2$d) × %3$s = %4$s\nPrevious balance: %5$s\nMonthly rent: %6$s\nTotal to collect: %7$s</string>
+    <string name="bill_breakdown_minimum">Electricity: %4$s (minimum for usage below 10 units)\nUsage: (%1$d - %2$d) units at %3$s/unit\nPrevious balance: %5$s\nMonthly rent: %6$s\nTotal to collect: %7$s</string>
     <string name="month_hint">Month (1–12)</string>
     <string name="year_hint">Year (YYYY)</string>
     <string name="rent_amount_hint">Rent amount</string>

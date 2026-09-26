@@ -75,7 +75,10 @@ object MonthlyCollectionCalculator {
     private fun score(month: YearMonth) = month.year * 12 + month.month
     private fun electricityCharge(payment: RecordTransaction): Double =
         if (payment.previousReading != null && payment.electricityRateCharged != null)
-            (payment.reading - payment.previousReading).coerceAtLeast(0) * payment.electricityRateCharged else 0.0
+            RentCalculator.electricityCharge(
+                (payment.reading - payment.previousReading).coerceAtLeast(0),
+                payment.electricityRateCharged
+            ) else 0.0
     private fun closingBalance(payment: RecordTransaction): Double? {
         val previous = payment.previousBalance ?: return null
         val rent = payment.rentCharged ?: return null

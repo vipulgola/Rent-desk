@@ -54,6 +54,23 @@ class TransactionDeletionCalculatorTest {
         TransactionDeletionCalculator.recalculate(listOf(legacy), setOf("legacy"), 100)
     }
 
+    @Test
+    fun deletingPaymentAppliesMinimumToRemainingLowUsageBill() {
+        val first = transaction("first", 1, 4, 0.0, 0, 2_000.0, 8.0, 2_100.0)
+        val second = transaction("second", 2, 9, 0.0, 4, 2_000.0, 8.0, 2_000.0)
+        val result = TransactionDeletionCalculator.recalculate(listOf(first, second), setOf("first"), 100)
+        assertEquals(100.0, result.balance, 0.0)
+        assertEquals(0, result.updatedTransactions.single().previousReading)
+    }
+
+    @Test
+    fun deletionRechecksUsageThresholdAfterChangingPreviousReading() {
+        val first = transaction("first", 1, 4, 0.0, 0, 2_000.0, 8.0, 2_100.0)
+        val second = transaction("second", 2, 12, 0.0, 4, 2_000.0, 8.0, 2_000.0)
+        val result = TransactionDeletionCalculator.recalculate(listOf(first, second), setOf("first"), 100)
+        assertEquals(96.0, result.balance, 0.0)
+    }
+
     private fun transaction(
         id: String,
         createdAt: Long,

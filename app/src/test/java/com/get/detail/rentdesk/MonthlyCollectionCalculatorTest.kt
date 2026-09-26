@@ -60,4 +60,16 @@ class MonthlyCollectionCalculatorTest {
         val result = MonthlyCollectionCalculator.calculate(listOf(future), emptyList(), month, month)
         assertEquals(0.0, result.expected, 0.001)
     }
+
+    @Test fun minimumIsIncludedInTotalsAndNextMonthsBalance() {
+        val bill = payment(received = 3500.0).copy(reading = 109)
+        val result = MonthlyCollectionCalculator.calculate(listOf(property), listOf(bill), month, month)
+        assertEquals(100.0, result.electricity, 0.001)
+        assertEquals(3600.0, result.expected, 0.001)
+        assertEquals(100.0, result.pending, 0.001)
+        val nextMonth = MonthlyCollectionCalculator.calculate(
+            listOf(property), listOf(bill), YearMonth(2026, 10), month
+        )
+        assertEquals(100.0, nextMonth.openingBalance, 0.001)
+    }
 }

@@ -338,7 +338,8 @@ class TransactionListFragment : Fragment() {
                 calculated = breakdown
                 calculatedReading = currentReading
                 dialogBinding.tvCalculationBreakdown.text = getString(
-                    R.string.bill_breakdown,
+                    if (breakdown.electricityCost > breakdown.consumedUnits * property.electricityPricePerUnit)
+                        R.string.bill_breakdown_minimum else R.string.bill_breakdown,
                     currentReading,
                     property.meterReading,
                     money(property.electricityPricePerUnit),

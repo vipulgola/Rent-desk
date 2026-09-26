@@ -11,6 +11,7 @@ import com.get.detail.rentdesk.data.local.entity.PropertyTenantInfo
 import com.get.detail.rentdesk.domain.usecase.LegacyTransactionHistoryException
 import com.get.detail.rentdesk.domain.usecase.DeletionAdjustment
 import com.get.detail.rentdesk.domain.usecase.TransactionDeletionCalculator
+import com.get.detail.rentdesk.domain.usecase.RentCalculator
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -91,7 +92,9 @@ interface TransactionDao {
         val lastRecordedAt = getActiveTransactionsForProperty(transaction.propertyId)
             .lastOrNull()?.createdAtUtc ?: 0L
         val charge = property.monthlyRent +
-            (transaction.reading - property.meterReading) * property.electricityPricePerUnit
+            RentCalculator.electricityCharge(
+                transaction.reading - property.meterReading, property.electricityPricePerUnit
+            )
         insertTransaction(
             transaction.copy(
                 previousBalance = property.balanceAmount,

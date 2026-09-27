@@ -38,25 +38,15 @@ class TenantViewModel(private val repository: RentRepository) : ViewModel() {
         meterReading: Int
     ) {
         viewModelScope.launch {
-            val property = repository.getPropertyById(propertyId)
-            property?.let {
-                val updatedProperty = it.copy(
-                    tenantInfo = tenantInfo,
-                    monthlyRent = monthlyRent,
-                    electricityPricePerUnit = electricityPricePerUnit,
-                    meterReading = meterReading
-                )
-                repository.updateProperty(updatedProperty)
-                navigateToTransactions.postValue(propertyId)
-            }
+            repository.saveTenant(propertyId, tenantInfo, monthlyRent, electricityPricePerUnit, meterReading)
+            _property.value = repository.getPropertyById(propertyId)
+            navigateToTransactions.postValue(propertyId)
         }
     }
 
     fun vacateProperty(propertyId: String) = viewModelScope.launch {
-        val property = repository.getPropertyById(propertyId) ?: return@launch
-        val vacantProperty = property.copy(tenantInfo = null)
-        repository.updateProperty(vacantProperty)
-        _property.value = vacantProperty
+        repository.vacateTenant(propertyId)
+        _property.value = repository.getPropertyById(propertyId)
         _propertyVacated.emit(Unit)
     }
 }

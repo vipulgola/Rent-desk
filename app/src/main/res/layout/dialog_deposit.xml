@@ -1,0 +1,17 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/deposit_separate_note" android:textColor="@color/text_secondary" />
+<com.google.android.material.textfield.TextInputLayout android:id="@+id/til_deposit_received" style="@style/Widget.Material3.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:hint="@string/deposit_received">
+<com.google.android.material.textfield.TextInputEditText android:id="@+id/et_deposit_received" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" />
+</com.google.android.material.textfield.TextInputLayout>
+<com.google.android.material.textfield.TextInputLayout android:id="@+id/til_deposit_deductions" style="@style/Widget.Material3.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:hint="@string/deposit_deductions">
+<com.google.android.material.textfield.TextInputEditText android:id="@+id/et_deposit_deductions" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" />
+</com.google.android.material.textfield.TextInputLayout>
+<com.google.android.material.textfield.TextInputLayout android:id="@+id/til_deposit_refunded" style="@style/Widget.Material3.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:hint="@string/deposit_refunded">
+<com.google.android.material.textfield.TextInputEditText android:id="@+id/et_deposit_refunded" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="numberDecimal" />
+</com.google.android.material.textfield.TextInputLayout>
+<com.google.android.material.textfield.TextInputLayout android:id="@+id/til_deposit_notes" style="@style/Widget.Material3.TextInputLayout.OutlinedBox" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:hint="@string/deposit_notes">
+<com.google.android.material.textfield.TextInputEditText android:id="@+id/et_deposit_notes" android:layout_width="match_parent" android:layout_height="wrap_content" android:inputType="textMultiLine" />
+</com.google.android.material.textfield.TextInputLayout>
+<TextView android:id="@+id/tv_deposit_remaining" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:textStyle="bold" android:textColor="@color/text_primary" />
+</LinearLayout></ScrollView>

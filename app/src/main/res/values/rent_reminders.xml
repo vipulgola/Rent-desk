@@ -1,0 +1,17 @@
+<resources>
+    <string name="rent_reminders_title">Due rent notifications</string>
+    <string name="rent_reminder_switch_summary">Get reminded when rent is due</string>
+    <string name="rent_reminder_time_label">Reminder time</string>
+    <string name="rent_reminder_daily_time">Daily around %1$s</string>
+    <string name="rent_reminder_enabled_summary">One daily summary while rent is due. Battery saving may delay delivery.</string>
+    <string name="rent_reminder_disabled_summary">Turn on reminders to receive a daily summary of due rents.</string>
+    <string name="rent_reminder_permission_needed">Allow Rent Desk notifications in your phone settings to receive rent reminders.</string>
+    <string name="rent_reminder_system_settings">Notification settings</string>
+    <string name="rent_reminder_channel_description">Daily reminders for properties with due rent</string>
+    <string name="rent_reminder_open_app">Open Rent Desk to review due rents.</string>
+    <string name="rent_reminder_more">And %1$d more properties</string>
+    <plurals name="rent_reminder_due_count">
+        <item quantity="one">Rent is due for %1$d property</item>
+        <item quantity="other">Rent is due for %1$d properties</item>
+    </plurals>
+</resources>

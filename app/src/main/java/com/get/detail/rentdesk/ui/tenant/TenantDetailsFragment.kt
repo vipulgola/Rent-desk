@@ -2,11 +2,13 @@ package com.get.detail.rentdesk.ui.tenant
 
 import android.os.Bundle
 import android.app.DatePickerDialog
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -17,13 +19,16 @@ import com.get.detail.rentdesk.R
 import com.get.detail.rentdesk.data.local.AppDatabase
 import com.get.detail.rentdesk.data.repository.RentRepository
 import com.get.detail.rentdesk.databinding.FragmentTenantDetailsBinding
+import com.get.detail.rentdesk.databinding.ItemTenantSummaryBinding
 import com.get.detail.rentdesk.domain.model.TenantInfo
+import com.get.detail.rentdesk.data.local.entity.PropertyTenantInfo
 import com.get.detail.rentdesk.utils.YearMonth
 import com.get.detail.rentdesk.viewmodel.TenantViewModel
 import com.get.detail.rentdesk.viewmodel.TenantViewModelFactory
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Locale
+import java.text.NumberFormat
 
 class TenantDetailsFragment : Fragment() {
     private var _binding: FragmentTenantDetailsBinding? = null
@@ -39,6 +44,7 @@ class TenantDetailsFragment : Fragment() {
     private var joiningYear: Int? = null
     private var joiningMonth: Int? = null
     private var joiningDay: Int? = null
+    private var isEditing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +69,14 @@ class TenantDetailsFragment : Fragment() {
             day = today.get(Calendar.DAY_OF_MONTH)
         )
 
+        binding.btnTenantHistory.setOnClickListener { propertyId?.let { TenantRecordDialogs.showHistory(this, it) } }
+        binding.btnSecurityDeposit.setOnClickListener {
+            val tenant = viewModel.property.value?.tenantInfo ?: return@setOnClickListener
+            val id = propertyId ?: return@setOnClickListener
+            tenant.tenancyId?.let { tenancyId ->
+                TenantRecordDialogs.showDeposit(this, id, tenancyId) { viewModel.getProperty(id) }
+            }
+        }
         binding.etJoiningDate.setOnClickListener { showJoiningDatePicker() }
         binding.tilJoiningDate.setEndIconOnClickListener { showJoiningDatePicker() }
 
@@ -73,8 +87,10 @@ class TenantDetailsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.property.collect { property ->
-                    binding.btnVacateProperty.visibility =
-                        if (property?.tenantInfo != null) View.VISIBLE else View.GONE
+                    if (property?.tenantInfo != null) {
+                        renderSummary(property)
+                    }
+                    updateMode(property?.tenantInfo != null)
                     property?.let {
                         binding.etMonthlyRent.setText(
                             it.monthlyRent.takeIf { value -> value > 0 }?.toString().orEmpty()
@@ -122,6 +138,10 @@ class TenantDetailsFragment : Fragment() {
 
         binding.btnSaveTenant.setOnClickListener {
             saveTenant()
+        }
+        binding.btnCancelEdit.setOnClickListener {
+            isEditing = false
+            updateMode(viewModel.property.value?.tenantInfo != null)
         }
         binding.btnVacateProperty.setOnClickListener {
             showVacateConfirmation()
@@ -188,6 +208,83 @@ class TenantDetailsFragment : Fragment() {
             )
         }
     }
+
+    private fun updateMode(hasTenant: Boolean) {
+        binding.tenantSummary.visibility = if (hasTenant && !isEditing) View.VISIBLE else View.GONE
+        binding.tenantEditForm.visibility = if (!hasTenant || isEditing) View.VISIBLE else View.GONE
+        binding.btnCancelEdit.visibility = if (hasTenant && isEditing) View.VISIBLE else View.GONE
+        binding.tenantActions.visibility = if (isEditing) View.GONE else View.VISIBLE
+        binding.btnSecurityDeposit.visibility = if (hasTenant) View.VISIBLE else View.GONE
+        binding.btnVacateProperty.visibility = if (hasTenant) View.VISIBLE else View.GONE
+    }
+
+    private fun renderSummary(property: PropertyTenantInfo) {
+        val tenant = property.tenantInfo ?: return
+        binding.tvSummaryInitial.text = tenant.name.firstOrNull()?.uppercase() ?: "?"
+        binding.tvSummaryName.text = tenant.name
+        binding.tvSummaryProperty.text = property.entityName
+        viewLifecycleOwner.lifecycleScope.launch {
+            val address = AppDatabase.getDatabase(requireContext()).addressDao()
+                .getAllAddressesList().firstOrNull { it.dataUUID == property.addressId }?.address
+            if (_binding != null) {
+                binding.tvSummaryProperty.text = listOfNotNull(property.entityName, address)
+                    .joinToString(" · ")
+            }
+        }
+        val rent = NumberFormat.getCurrencyInstance(Locale("en", "IN")).apply {
+            maximumFractionDigits = 0
+        }
+        val price = NumberFormat.getCurrencyInstance(Locale("en", "IN"))
+        val maskedAadhaar = tenant.aadhaarNumber.takeLast(4).let { "XXXX XXXX $it" }
+        val details = listOf(
+            SummaryField(R.string.joining_date,
+                String.format(Locale.getDefault(), "%02d/%02d/%04d",
+                    tenant.joiningDayOfMonth, tenant.joiningMonthYear.month,
+                    tenant.joiningMonthYear.year), R.drawable.ic_calendar_24, binding.etJoiningDate),
+            SummaryField(R.string.monthly_rent, rent.format(property.monthlyRent),
+                R.drawable.ic_receipt_24, binding.etMonthlyRent),
+            SummaryField(R.string.electricity_price_per_unit,
+                price.format(property.electricityPricePerUnit), R.drawable.ic_bolt_24,
+                binding.etElectricityPrice, R.color.tenant_detail_orange_icon, R.color.tenant_detail_orange_background),
+            SummaryField(R.string.mobile_number, tenant.mobileNumber,
+                R.drawable.ic_phone_24, binding.etMobileNumber,
+                R.color.tenant_detail_green_icon, R.color.tenant_detail_green_background),
+            SummaryField(R.string.aadhaar_number, maskedAadhaar,
+                R.drawable.ic_receipt_24, binding.etAadhaarNumber,
+                R.color.tenant_detail_purple_icon, R.color.tenant_detail_purple_background),
+            SummaryField(R.string.address, tenant.address,
+                R.drawable.ic_location_24, binding.etAddress)
+        )
+        binding.summaryRows.removeAllViews()
+        details.forEach { field ->
+            val row = ItemTenantSummaryBinding.inflate(layoutInflater, binding.summaryRows, false)
+            row.ivRowIcon.setImageResource(field.icon)
+            row.ivRowIcon.setColorFilter(ContextCompat.getColor(requireContext(), field.iconTint))
+            row.ivRowIcon.backgroundTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(requireContext(), field.iconBackground)
+            )
+            row.tvRowLabel.setText(field.label)
+            row.tvRowValue.text = field.value
+            row.root.contentDescription = getString(
+                R.string.tenant_edit_field_description, getString(field.label), field.value
+            )
+            row.root.setOnClickListener {
+                isEditing = true
+                updateMode(true)
+                field.focus.requestFocus()
+            }
+            binding.summaryRows.addView(row.root)
+        }
+    }
+
+    private data class SummaryField(
+        val label: Int,
+        val value: String,
+        val icon: Int,
+        val focus: View,
+        val iconTint: Int = R.color.tenant_detail_blue_icon,
+        val iconBackground: Int = R.color.tenant_detail_blue_background
+    )
 
     private fun formatElectricityPrice(value: Double): String = when {
         value <= 0.0 -> ""

@@ -1,77 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="4dp"
-    android:layout_marginVertical="6dp"
+    android:layout_marginHorizontal="2dp"
+    android:layout_marginBottom="16dp"
+    android:theme="@style/ThemeOverlay.RentDesk.PropertyCard"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground"
     app:cardBackgroundColor="@color/app_surface"
+    app:cardForegroundColor="@android:color/transparent"
     app:cardCornerRadius="20dp"
-    app:cardElevation="0dp"
-    app:strokeColor="@color/outline_soft"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/address_active_outline"
     app:strokeWidth="1dp">
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="88dp"
-        android:padding="18dp">
-
-        <ImageView
+        android:padding="16dp">
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_address_icon"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@drawable/bg_icon_container"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/bg_address_circle"
+            android:backgroundTint="@color/address_occupied_background"
             android:contentDescription="@null"
-            android:padding="10dp"
-            android:src="@drawable/ic_location_24"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:padding="11dp"
+            app:srcCompat="@drawable/ic_location_24"
+            app:tint="@color/address_occupied"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
         <TextView
             android:id="@+id/tv_address_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="end"
             android:maxLines="2"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/address_heading"
+            android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/btn_edit_address"
+            app:layout_constraintEnd_toStartOf="@id/address_action_start"
             app:layout_constraintStart_toEndOf="@id/iv_address_icon"
-            app:layout_constraintTop_toTopOf="@id/iv_address_icon" />
-
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Mujesar 42" />
         <TextView
             android:id="@+id/tv_property_count"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+            android:layout_marginEnd="8dp"
             android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@id/address_action_start"
+            app:layout_constraintStart_toStartOf="@id/tv_address_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_address_title"
+            tools:text="3 properties" />
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/address_action_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierAllowsGoneWidgets="false"
+            app:barrierDirection="start"
+            app:constraint_referenced_ids="iv_chevron,btn_edit_address" />
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_chevron"
+            android:layout_width="20dp"
+            android:layout_height="24dp"
+            android:contentDescription="@null"
+            app:srcCompat="@drawable/ic_chevron_right_24"
+            app:tint="@color/text_secondary"
             app:layout_constraintBottom_toBottomOf="@id/iv_address_icon"
-            app:layout_constraintEnd_toStartOf="@id/btn_edit_address"
-            app:layout_constraintStart_toEndOf="@id/iv_address_icon"
-            app:layout_constraintTop_toBottomOf="@id/tv_address_title" />
-
-        <ImageButton
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/iv_address_icon" />
+        <androidx.appcompat.widget.AppCompatImageButton
             android:id="@+id/btn_edit_address"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/edit_address"
-            android:padding="8dp"
-            android:src="@drawable/ic_edit_24"
+            android:padding="12dp"
             android:visibility="gone"
+            app:srcCompat="@drawable/ic_edit_24"
+            app:tint="@color/brand_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/iv_address_icon" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_occupied"
+            style="@style/Widget.RentDesk.AddressBadge"
+            android:backgroundTint="@color/address_occupied_background"
+            android:drawableTint="@color/address_occupied"
+            android:textColor="@color/address_occupied"
+            tools:text="2 Occupied" />
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_vacant"
+            style="@style/Widget.RentDesk.AddressBadge"
+            android:backgroundTint="@color/address_vacant_background"
+            android:drawableTint="@color/address_vacant"
+            android:textColor="@color/address_vacant"
+            tools:text="1 Vacant" />
+        <androidx.constraintlayout.helper.widget.Flow
+            android:id="@+id/occupancy_flow"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:constraint_referenced_ids="tv_occupied,tv_vacant"
+            app:flow_horizontalBias="0"
+            app:flow_horizontalGap="8dp"
+            app:flow_horizontalStyle="packed"
+            app:flow_verticalGap="6dp"
+            app:flow_wrapMode="chain"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_address_title"
+            app:layout_constraintTop_toBottomOf="@id/tv_property_count" />
+        <View
+            android:id="@+id/footer_divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/outline_soft"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_address_title"
+            app:layout_constraintTop_toBottomOf="@id/occupancy_flow"
+            app:layout_goneMarginTop="12dp" />
+
+        <LinearLayout
+            android:id="@+id/row_pending"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:minHeight="36dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:screenReaderFocusable="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/text_secondary" />
+            app:layout_constraintStart_toStartOf="@id/tv_address_title"
+            app:layout_constraintTop_toBottomOf="@id/footer_divider">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_pending_icon"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/bg_address_circle"
+                android:backgroundTint="@color/address_pending_background"
+                android:contentDescription="@null"
+                android:padding="6dp"
+                app:srcCompat="@drawable/ic_property_rupee"
+                app:tint="@color/address_pending" />
+            <TextView
+                android:id="@+id/tv_pending_amount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:textColor="@color/address_pending"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="₹1,680 pending" />
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_first_property"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="start|center_vertical"
+            android:minWidth="0dp"
+            android:minHeight="48dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="4dp"
+            android:text="@string/address_add_first_property"
+            android:textAllCaps="false"
+            android:textColor="@color/brand_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:icon="@drawable/ic_add_24"
+            app:iconPadding="10dp"
+            app:iconSize="22dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tv_address_title"
+            app:layout_constraintTop_toBottomOf="@id/footer_divider" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </com.google.android.material.card.MaterialCardView>

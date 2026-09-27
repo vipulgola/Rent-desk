@@ -1,0 +1,10 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="wrap_content">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+    <TextView android:id="@+id/tv_restore_source" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="@color/text_secondary" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/restore_current_data" android:textStyle="bold" android:textColor="@color/text_primary" />
+    <TextView android:id="@+id/tv_restore_current" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/text_secondary" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/restore_backup_data" android:textStyle="bold" android:textColor="@color/text_primary" />
+    <TextView android:id="@+id/tv_restore_backup" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="@color/text_secondary" />
+    <TextView android:id="@+id/tv_restore_dates" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textColor="@color/text_secondary" />
+    <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/restore_replaces_data" android:textColor="@color/status_due" />
+</LinearLayout></ScrollView>

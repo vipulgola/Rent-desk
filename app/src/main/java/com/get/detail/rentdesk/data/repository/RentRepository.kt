@@ -10,6 +10,12 @@ import com.get.detail.rentdesk.data.local.entity.Address
 import com.get.detail.rentdesk.data.local.entity.PropertyTenantInfo
 import com.get.detail.rentdesk.data.local.entity.RecordTransaction
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import androidx.room.withTransaction
+import com.get.detail.rentdesk.data.local.AppDatabase
+import com.get.detail.rentdesk.domain.model.TenantInfo
+import com.get.detail.rentdesk.domain.model.TenantHistoryEntry
+import java.util.UUID
 
 class RentRepository(
     context: Context,
@@ -17,6 +23,7 @@ class RentRepository(
     private val propertyTenantDao: PropertyTenantDao,
     private val transactionDao: TransactionDao
 ) {
+    private val database = AppDatabase.getDatabase(context.applicationContext)
     private val autoBackupScheduler = AutoBackupScheduler(context.applicationContext)
     val allAddresses: Flow<List<Address>> = addressDao.getAllAddresses()
     val addressesWithCount: Flow<List<AddressWithPropertyCount>> = addressDao.getAddressesWithPropertyCount()
@@ -45,6 +52,61 @@ class RentRepository(
         autoBackupScheduler.databaseChanged()
     }
 
+    suspend fun saveTenant(propertyId: String, info: TenantInfo, rent: Int, rate: Double, reading: Int) {
+        database.withTransaction {
+            val property = propertyTenantDao.getPropertyById(propertyId) ?: error("Property not found")
+            val previous = property.tenantInfo
+            val tenant = info.copy(
+                tenancyId = previous?.tenancyId ?: UUID.randomUUID().toString(),
+                depositReceived = previous?.depositReceived ?: 0.0,
+                depositDeductions = previous?.depositDeductions ?: 0.0,
+                depositRefunded = previous?.depositRefunded ?: 0.0,
+                depositNotes = previous?.depositNotes
+            )
+            propertyTenantDao.updateProperty(property.copy(tenantInfo = tenant, monthlyRent = rent,
+                balanceAmount = if (previous == null) 0.0 else property.balanceAmount,
+                unassignedBalance = if (previous == null && property.balanceAmount != 0.0)
+                    property.balanceAmount else property.unassignedBalance,
+                electricityPricePerUnit = rate, meterReading = reading, modifiedAtUtc = System.currentTimeMillis()))
+        }
+        autoBackupScheduler.databaseChanged()
+    }
+
+    suspend fun vacateTenant(propertyId: String) {
+        database.withTransaction {
+            val property = propertyTenantDao.getPropertyById(propertyId) ?: error("Property not found")
+            val tenant = property.tenantInfo ?: return@withTransaction
+            val now = System.currentTimeMillis()
+            val history = TenantHistoryEntry(tenant, property.monthlyRent, now, property.balanceAmount)
+            propertyTenantDao.updateProperty(property.copy(tenantInfo = null, balanceAmount = 0.0,
+                tenantHistory = property.tenantHistory.orEmpty() + history, modifiedAtUtc = now))
+        }
+        autoBackupScheduler.databaseChanged()
+    }
+
+    suspend fun updateDeposit(propertyId: String, tenancyId: String, received: Double,
+        deductions: Double, refunded: Double, notes: String) {
+        require(listOf(received, deductions, refunded).all { it.isFinite() && it >= 0.0 })
+        require(deductions + refunded <= received + 0.005) { "Deductions and refunds exceed the deposit" }
+        database.withTransaction {
+            val property = propertyTenantDao.getPropertyById(propertyId) ?: error("Property not found")
+            fun updated(tenant: TenantInfo) = tenant.copy(depositReceived = received,
+                depositDeductions = deductions, depositRefunded = refunded, depositNotes = notes)
+            val active = property.tenantInfo
+            val found = active?.tenancyId == tenancyId ||
+                property.tenantHistory.orEmpty().any { it.tenant.tenancyId == tenancyId }
+            require(found) { "Tenant not found" }
+            propertyTenantDao.updateProperty(property.copy(
+                tenantInfo = if (active != null && active.tenancyId == tenancyId) updated(active) else active,
+                tenantHistory = property.tenantHistory?.map {
+                    if (it.tenant.tenancyId == tenancyId) it.copy(tenant = updated(it.tenant)) else it
+                },
+                modifiedAtUtc = System.currentTimeMillis()
+            ))
+        }
+        autoBackupScheduler.databaseChanged()
+    }
+
     suspend fun deleteProperty(property: PropertyTenantInfo) {
         propertyTenantDao.deleteProperty(property)
         autoBackupScheduler.databaseChanged()
@@ -70,7 +132,10 @@ class RentRepository(
     }
 
     fun getTransactionsForProperty(propertyId: String): Flow<List<RecordTransaction>> {
-        return transactionDao.getTransactionsForProperty(propertyId)
+        return combine(transactionDao.getTransactionsForProperty(propertyId), allProperties) { payments, properties ->
+            val tenant = properties.firstOrNull { it.propertyId == propertyId }?.tenantInfo
+            if (tenant == null) emptyList() else payments.filter { it.tenancyId == tenant.tenancyId }
+        }
     }
 
     suspend fun insertTransaction(transaction: RecordTransaction) {

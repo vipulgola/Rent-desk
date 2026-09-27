@@ -33,15 +33,51 @@
         android:label="Properties"
         tools:layout="@layout/fragment_property_list">
         <argument
+            android:name="addProperty"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <argument
             android:name="addressId"
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
         <action
+            android:id="@+id/action_propertyListFragment_to_monthlyCollectionFragment"
+            app:destination="@id/monthlyCollectionFragment" />
+        <action
+            android:id="@+id/action_propertyListFragment_to_propertyDetailsFragment"
+            app:destination="@id/propertyDetailsFragment" />
+        <action
             android:id="@+id/action_propertyListFragment_to_tenantDetailsFragment"
             app:destination="@id/tenantDetailsFragment" />
         <action
             android:id="@+id/action_propertyListFragment_to_transactionListFragment"
+            app:destination="@id/transactionListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/monthlyCollectionFragment"
+        android:name="com.get.detail.rentdesk.ui.collection.MonthlyCollectionFragment"
+        android:label="@string/monthly_collection"
+        tools:layout="@layout/fragment_monthly_collection">
+        <argument
+            android:name="addressId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/propertyDetailsFragment"
+        android:name="com.get.detail.rentdesk.ui.property.PropertyDetailsFragment"
+        android:label="@string/property_overview"
+        tools:layout="@layout/fragment_property_details">
+        <argument android:name="propertyId" app:argType="string" />
+        <action
+            android:id="@+id/action_propertyDetailsFragment_to_tenantDetailsFragment"
+            app:destination="@id/tenantDetailsFragment" />
+        <action
+            android:id="@+id/action_propertyDetailsFragment_to_transactionListFragment"
             app:destination="@id/transactionListFragment" />
     </fragment>
 

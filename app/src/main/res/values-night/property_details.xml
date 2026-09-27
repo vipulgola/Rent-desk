@@ -1,0 +1,23 @@
+<resources>
+    <color name="property_detail_page">@color/property_page_background</color>
+    <color name="property_detail_surface">@color/app_surface</color>
+    <color name="property_detail_outline">@color/outline_soft</color>
+    <color name="property_detail_title">@color/text_primary</color>
+    <color name="property_detail_secondary">@color/overview_secondary</color>
+    <color name="property_detail_accent">#72B7FF</color>
+    <color name="property_detail_hero_start">@color/app_surface</color>
+    <color name="property_detail_hero_end">@color/app_surface</color>
+    <color name="property_detail_hero_outline">@color/outline_soft</color>
+    <color name="property_detail_art">@color/app_surface_variant</color>
+    <color name="property_detail_home_background">#223B56</color>
+    <color name="property_detail_home_outline">#2F4D70</color>
+    <color name="property_detail_avatar_background">#244A76</color>
+    <color name="property_detail_icon_background">#2A3B50</color>
+    <color name="property_detail_edit_background">#16454D</color>
+    <color name="property_detail_edit_icon">#94DEDF</color>
+    <color name="property_detail_history_background">@color/app_surface</color>
+    <color name="property_detail_history_outline">@color/outline_soft</color>
+    <color name="property_detail_due_background">#663A34</color>
+    <color name="property_detail_due_text">#FFBBB1</color>
+    <color name="property_detail_due_outline">#A65146</color>
+</resources>

@@ -1,0 +1,52 @@
+<resources>
+    <color name="property_detail_page">@color/property_page_background</color>
+    <color name="property_detail_surface">@color/app_surface</color>
+    <color name="property_detail_outline">@color/outline_soft</color>
+    <color name="property_detail_title">@color/text_primary</color>
+    <color name="property_detail_secondary">@color/overview_secondary</color>
+    <color name="property_detail_accent">#155BC0</color>
+    <color name="property_detail_hero_start">@color/app_surface</color>
+    <color name="property_detail_hero_end">@color/app_surface</color>
+    <color name="property_detail_hero_outline">@color/outline_soft</color>
+    <color name="property_detail_art">@color/app_surface_variant</color>
+    <color name="property_detail_home_background">#DFEDFF</color>
+    <color name="property_detail_home_outline">#DAE8FC</color>
+    <color name="property_detail_avatar_background">#DFECFF</color>
+    <color name="property_detail_icon_background">#ECF4FF</color>
+    <color name="property_detail_edit_background">#ECF4FF</color>
+    <color name="property_detail_edit_icon">#155BC0</color>
+    <color name="property_detail_history_background">@color/app_surface</color>
+    <color name="property_detail_history_outline">@color/outline_soft</color>
+    <color name="property_detail_due_background">#FFE3E3</color>
+    <color name="property_detail_due_text">#B62329</color>
+    <color name="property_detail_due_outline">#FFE3E3</color>
+
+    <string name="property_detail_transactions_description">See all payments and records</string>
+    <string name="property_detail_edit_description">Update details and settings</string>
+
+    <style name="Widget.RentDesk.PropertyDetailCard" parent="">
+        <item name="cardBackgroundColor">@color/property_detail_surface</item>
+        <item name="cardForegroundColor">@android:color/transparent</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/property_detail_outline</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="rippleColor">?attr/colorControlHighlight</item>
+    </style>
+    <style name="Widget.RentDesk.PropertyDetailActionCard" parent="Widget.RentDesk.PropertyDetailCard">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="TextAppearance.RentDesk.PropertyDetailToolbar" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/property_detail_title</item>
+    </style>
+    <style name="TextAppearance.RentDesk.PropertyDetailSubtitle" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/property_detail_secondary</item>
+    </style>
+</resources>

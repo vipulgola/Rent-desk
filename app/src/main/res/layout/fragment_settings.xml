@@ -1,227 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/app_background">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/app_surface"
-            app:cardCornerRadius="20dp"
-            app:strokeColor="@color/outline_soft"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchAppLock"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/app_lock"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/app_lock_summary"
-                    android:textColor="@color/text_secondary" />
-
-                <LinearLayout
-                    android:id="@+id/rowLockMethod"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical"
-                    android:paddingVertical="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/lock_method"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
-                    <TextView
-                        android:id="@+id/tvLockMethodValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:textColor="@color/text_secondary" />
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switchBiometrics"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/use_biometrics" />
-
-                <TextView
-                    android:id="@+id/tvBiometricSummary"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="@string/biometrics_unavailable"
-                    android:textColor="@color/text_secondary"
-                    android:visibility="gone" />
-
-                <LinearLayout
-                    android:id="@+id/rowLockTimeout"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:orientation="vertical"
-                    android:paddingVertical="12dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/lock_timeout"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
-                    <TextView
-                        android:id="@+id/tvLockTimeoutValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:textColor="@color/text_secondary" />
-                </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnChangeLock"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/change_lock" />
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="@color/app_surface"
-            app:cardCornerRadius="20dp"
-            app:strokeColor="@color/outline_soft"
-            app:strokeWidth="1dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/google_drive_backup"
-                    android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
-
-                <TextView
-                    android:id="@+id/tvDriveAccount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tvBackupMobile"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tvLastDriveBackup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tvAutomaticBackupStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textColor="@color/text_secondary" />
-
-                <com.google.android.material.progressindicator.LinearProgressIndicator
-                    android:id="@+id/progressDrive"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:indeterminate="true"
-                    android:visibility="gone" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnConnectDrive"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/connect_google_drive" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBackupNow"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/back_up_now" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnAutomaticBackup"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/enable_automatic_backup" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnRestoreBackup"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/restore_backup" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnExportReadable"
-                    style="@style/Widget.Material3.Button.OutlinedButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/export_readable_drive" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnDisconnectDrive"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_marginTop="4dp"
-                    android:text="@string/disconnect_drive" />
-
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-    </LinearLayout>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/app_background">
+  <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="18dp">
+    <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" app:cardBackgroundColor="@color/app_surface" app:cardCornerRadius="18dp" app:cardElevation="0dp" app:strokeColor="@color/outline_soft" app:strokeWidth="1dp">
+      <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="15dp" android:paddingTop="8dp" android:paddingBottom="12dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="68dp" android:gravity="center_vertical" android:orientation="horizontal">
+          <ImageView android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/bg_icon_container" android:contentDescription="@null" android:padding="9dp" android:src="@drawable/ic_lock_24" />
+          <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/app_lock" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:textColor="@color/text_primary" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/app_lock_summary" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+          </LinearLayout>
+          <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/switchAppLock" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@string/app_lock" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline_soft" />
+        <LinearLayout android:id="@+id/rowLockMethod" android:layout_width="match_parent" android:layout_height="68dp" android:gravity="center_vertical" android:orientation="horizontal" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true">
+          <ImageView android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/bg_icon_green" android:contentDescription="@null" android:padding="9dp" android:src="@drawable/ic_shield_24" />
+          <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/lock_method" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:textColor="@color/text_primary" android:textStyle="bold" />
+            <TextView android:id="@+id/tvLockMethodValue" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+          </LinearLayout>
+          <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_24" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/outline_soft" />
+        <LinearLayout android:id="@+id/rowLockTimeout" android:layout_width="match_parent" android:layout_height="68dp" android:gravity="center_vertical" android:orientation="horizontal" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true">
+          <ImageView android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/bg_icon_green" android:contentDescription="@null" android:padding="9dp" android:src="@drawable/ic_clock_24" />
+          <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/lock_timeout" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:textColor="@color/text_primary" android:textStyle="bold" />
+            <TextView android:id="@+id/tvLockTimeoutValue" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+          </LinearLayout>
+          <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_24" />
+        </LinearLayout>
+        <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/switchBiometrics" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="@string/use_biometrics" android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+        <TextView android:id="@+id/tvBiometricSummary" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/biometrics_unavailable" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnChangeLock" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end" android:text="@string/change_lock" />
+      </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+    <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" app:cardBackgroundColor="@color/app_surface" app:cardCornerRadius="18dp" app:cardElevation="0dp" app:strokeColor="@color/outline_soft" app:strokeWidth="1dp">
+      <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="15dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="60dp" android:gravity="center_vertical" android:orientation="horizontal">
+          <androidx.appcompat.widget.AppCompatImageView android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/bg_icon_container" android:contentDescription="@null" android:padding="9dp" app:srcCompat="@drawable/ic_rent_notification" app:tint="@color/brand_primary" />
+          <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_marginEnd="8dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/rent_reminders_title" android:textStyle="bold" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:textColor="@color/text_primary" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/rent_reminder_switch_summary" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+          </LinearLayout>
+          <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/switchRentReminders" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@string/rent_reminders_title" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="8dp" android:background="@color/outline_soft" />
+        <LinearLayout android:id="@+id/rowRentReminderTime" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="64dp" android:gravity="center_vertical" android:orientation="horizontal" android:background="?attr/selectableItemBackground" android:clickable="true" android:focusable="true">
+          <ImageView android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/bg_icon_green" android:contentDescription="@null" android:padding="9dp" android:src="@drawable/ic_clock_24" />
+          <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_marginEnd="8dp" android:layout_weight="1" android:orientation="vertical">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/rent_reminder_time_label" android:textStyle="bold" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:textColor="@color/text_primary" />
+            <TextView android:id="@+id/tvRentReminderTime" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+          </LinearLayout>
+          <ImageView android:layout_width="18dp" android:layout_height="18dp" android:contentDescription="@null" android:src="@drawable/ic_chevron_right_24" />
+        </LinearLayout>
+        <TextView android:id="@+id/tvRentReminderStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnRentNotificationSettings" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end" android:visibility="gone" android:text="@string/rent_reminder_system_settings" />
+      </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+    <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" app:cardBackgroundColor="@color/app_surface" app:cardCornerRadius="18dp" app:cardElevation="0dp" app:strokeColor="@color/outline_soft" app:strokeWidth="1dp">
+      <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="15dp" android:paddingTop="8dp" android:paddingBottom="14dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="66dp" android:gravity="center_vertical" android:orientation="horizontal">
+          <ImageView android:layout_width="38dp" android:layout_height="38dp" android:background="@drawable/bg_icon_container" android:contentDescription="@null" android:padding="9dp" android:src="@drawable/ic_cloud_24" />
+          <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_weight="1" android:text="@string/google_drive_backup" android:textAppearance="@style/TextAppearance.Material3.BodyMedium" android:textColor="@color/text_primary" android:textStyle="bold" />
+          <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/switchDriveBackup" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@string/enable_automatic_backup" />
+        </LinearLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginTop="14dp" android:background="@color/outline_soft" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:orientation="horizontal">
+          <TextView android:id="@+id/tvLastDriveBackup" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+        </LinearLayout>
+        <TextView android:id="@+id/tvAutomaticBackupStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="9dp" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+        <com.google.android.material.progressindicator.LinearProgressIndicator android:id="@+id/progressDrive" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:indeterminate="true" android:visibility="gone" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnBackupNow" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="7dp" android:text="@string/back_up_now" app:cornerRadius="14dp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnRestoreBackup" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="7dp" android:text="@string/restore_backup" app:cornerRadius="14dp" />
+        <com.google.android.material.button.MaterialButton style="@style/Widget.Material3.Button.TextButton" android:id="@+id/btnBackupMore" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end" android:text="@string/backup_more" />
+        <LinearLayout android:id="@+id/backupMoreOptions" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+          <TextView android:id="@+id/tvDriveAccount" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+          <TextView android:id="@+id/tvBackupMobile" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.Material3.BodySmall" android:textColor="@color/text_secondary" />
+          <com.google.android.material.button.MaterialButton android:id="@+id/btnConnectDrive" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="7dp" android:text="@string/connect_google_drive" app:cornerRadius="14dp" />
+          <com.google.android.material.button.MaterialButton android:id="@+id/btnExportReadable" style="@style/Widget.Material3.Button.OutlinedButton" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginTop="7dp" android:text="@string/export_readable_drive" app:cornerRadius="14dp" />
+          <com.google.android.material.button.MaterialButton android:id="@+id/btnDisconnectDrive" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end" android:layout_marginTop="5dp" android:text="@string/disconnect_drive" />
+          <com.google.android.material.button.MaterialButton android:id="@+id/btnAutomaticBackup" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" android:text="@string/enable_automatic_backup" />
+        </LinearLayout>
+      </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+  </LinearLayout>
 </ScrollView>

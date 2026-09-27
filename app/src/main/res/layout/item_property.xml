@@ -1,103 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginHorizontal="4dp"
-    android:layout_marginVertical="6dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/app_surface"
-    app:cardCornerRadius="20dp"
-    app:cardElevation="0dp"
-    app:strokeColor="@color/outline_soft"
-    app:strokeWidth="1dp">
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:layout_marginHorizontal="2dp" android:layout_marginBottom="12dp"
+    android:theme="@style/ThemeOverlay.RentDesk.PropertyCard"
+    android:clickable="true" android:focusable="true" android:foreground="?attr/selectableItemBackground"
+    app:cardBackgroundColor="@color/app_surface" app:cardCornerRadius="18dp"
+    app:cardForegroundColor="@android:color/transparent"
+    app:cardElevation="2dp" app:strokeWidth="0dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="12dp">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="60dp">
+            <CheckBox android:id="@+id/cb_property_selected" android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:clickable="false" android:focusable="false"
+                android:visibility="gone" app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent" />
+            <androidx.appcompat.widget.AppCompatImageView android:id="@+id/iv_property_icon"
+                android:layout_width="48dp" android:layout_height="48dp"
+                android:background="@drawable/bg_property_icon" android:contentDescription="@null"
+                android:padding="11dp" app:srcCompat="@drawable/ic_home_24"
+                app:layout_constraintStart_toEndOf="@id/cb_property_selected"
+                app:layout_constraintTop_toTopOf="parent" />
+            <TextView android:id="@+id/tv_property_name" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" android:layout_marginEnd="6dp"
+                android:ellipsize="end" android:maxLines="1" android:textSize="18sp"
+                android:textColor="@color/text_primary" android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/iv_property_icon"
+                app:layout_constraintEnd_toStartOf="@id/tv_payment_status" app:layout_constraintTop_toTopOf="parent" />
+            <TextView android:id="@+id/tv_tenant_name" android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" android:layout_marginEnd="6dp"
+                 android:textSize="14sp"
+                android:textColor="@color/text_secondary" app:layout_constraintStart_toEndOf="@id/iv_property_icon"
+                app:layout_constraintEnd_toStartOf="@id/tv_payment_status" app:layout_constraintTop_toBottomOf="@id/tv_property_name" />
+            <TextView android:id="@+id/tv_payment_status" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp" android:gravity="center" android:textSize="12sp"
+                android:textStyle="bold" android:maxLines="1"
+                app:layout_constraintEnd_toStartOf="@id/property_action_start"
+                app:layout_constraintTop_toTopOf="@id/iv_property_icon"
+                app:layout_constraintBottom_toBottomOf="@id/iv_property_icon" />
+            <androidx.constraintlayout.widget.Barrier android:id="@+id/property_action_start"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                app:barrierAllowsGoneWidgets="false" app:barrierDirection="start"
+                app:constraint_referenced_ids="iv_chevron,btn_edit_property" />
+            <ImageView android:id="@+id/iv_chevron" android:layout_width="20dp" android:layout_height="24dp"
+                android:contentDescription="@null" android:src="@drawable/ic_chevron_right_24"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="@id/iv_property_icon"
+                app:layout_constraintBottom_toBottomOf="@id/iv_property_icon" />
+            <ImageButton android:id="@+id/btn_edit_property" android:layout_width="48dp" android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/edit_property_name"
+                android:padding="12dp" android:src="@drawable/ic_edit_24" android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="@id/iv_property_icon"
+                app:layout_constraintBottom_toBottomOf="@id/iv_property_icon" app:tint="@color/brand_primary" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <View android:layout_width="match_parent" android:layout_height="1dp"
+            android:layout_marginTop="10dp" android:layout_marginBottom="10dp" android:background="@color/outline_soft" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:baselineAligned="false" android:gravity="center_vertical" android:orientation="horizontal">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:minHeight="92dp"
-        android:padding="18dp">
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal">
+                <androidx.appcompat.widget.AppCompatImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_property_metric_icon" android:contentDescription="@null" android:padding="7dp" app:srcCompat="@drawable/ic_property_rupee" app:tint="@color/text_primary" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical">
+                    <TextView android:id="@+id/tv_rent_label" style="@style/Widget.RentDesk.PropertyLabel" />
+                    <TextView android:id="@+id/tv_monthly_rent" style="@style/Widget.RentDesk.PropertyValue" />
+                </LinearLayout>
+            </LinearLayout>
+            <View android:layout_width="1dp" android:layout_height="36dp" android:layout_marginHorizontal="10dp" android:background="@color/outline_soft" />
 
-        <CheckBox
-            android:id="@+id/cb_property_selected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:focusable="false"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/iv_property_icon"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@drawable/bg_icon_container"
-            android:contentDescription="@null"
-            android:padding="10dp"
-            android:src="@drawable/ic_home_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/cb_property_selected"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tv_property_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="12dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-            android:textColor="@color/text_primary"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/tv_payment_status"
-            app:layout_constraintStart_toEndOf="@id/iv_property_icon"
-            app:layout_constraintTop_toTopOf="@id/iv_property_icon" />
-
-        <TextView
-            android:id="@+id/tv_tenant_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="4dp"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-            android:textColor="@color/text_secondary"
-            app:layout_constraintEnd_toStartOf="@id/tv_payment_status"
-            app:layout_constraintStart_toEndOf="@id/iv_property_icon"
-            app:layout_constraintTop_toBottomOf="@id/tv_property_name" />
-
-        <TextView
-            android:id="@+id/tv_payment_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:minWidth="58dp"
-            android:textAppearance="@style/TextAppearance.Material3.LabelMedium"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_edit_property"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/btn_edit_property"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/edit_property_name"
-            android:padding="8dp"
-            android:src="@drawable/ic_edit_24"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/text_secondary" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
+            <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center_vertical" android:orientation="horizontal">
+                <androidx.appcompat.widget.AppCompatImageView android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_property_metric_icon" android:contentDescription="@null" android:padding="7dp" app:srcCompat="@drawable/ic_calendar_24" app:tint="@color/text_primary" />
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:orientation="vertical">
+                    <TextView android:id="@+id/tv_billing_date_label" style="@style/Widget.RentDesk.PropertyLabel" />
+                    <TextView android:id="@+id/tv_billing_date" style="@style/Widget.RentDesk.PropertyValue" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btn_collect_rent"
+            style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_gravity="end" android:minHeight="48dp"
+            android:layout_marginTop="6dp" android:text="@string/collect_rent" android:textAllCaps="false"
+            app:icon="@drawable/ic_property_rupee" />
+    </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -3,17 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/address_page_background">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_addresses"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingStart="12dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="96dp"
+        android:clipChildren="false"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="108dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,34 +22,22 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/item_address" />
 
-    <TextView
-        android:id="@+id/tv_empty_state"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="40dp"
-        android:drawablePadding="16dp"
-        android:gravity="center"
-        android:lineSpacingExtra="6dp"
-        android:text="@string/no_addresses"
-        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
-        android:textColor="@color/text_secondary"
-        android:visibility="gone"
-        app:drawableTopCompat="@drawable/ic_location_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab_add_address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="20dp"
-        android:contentDescription="@string/add_address"
-        app:backgroundTint="@color/brand_primary"
+        android:layout_margin="22dp"
+        android:minHeight="56dp"
+        android:text="@string/add_address"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:backgroundTint="@color/action_button_background"
+        app:cornerRadius="26dp"
+        app:elevation="6dp"
+        app:icon="@drawable/ic_add_24"
+        app:iconSize="26dp"
+        app:iconTint="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:srcCompat="@drawable/ic_add_24"
-        app:tint="@android:color/white" />
-
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

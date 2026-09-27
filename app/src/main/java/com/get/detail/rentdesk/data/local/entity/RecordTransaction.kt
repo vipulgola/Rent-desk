@@ -5,6 +5,8 @@ import androidx.room.ColumnInfo
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.get.detail.rentdesk.utils.YearMonth
+import com.get.detail.rentdesk.utils.PaymentDateUtils
 
 @Entity(
     tableName = "record_transaction",
@@ -38,5 +40,9 @@ data class RecordTransaction(
     @ColumnInfo(defaultValue = "0")
     val createdAtUtc: Long = System.currentTimeMillis(),
     @ColumnInfo(defaultValue = "0")
-    val modifiedAtUtc: Long = createdAtUtc
-)
+    val modifiedAtUtc: Long = createdAtUtc,
+    val billingMonth: YearMonth? = null,
+    val tenancyId: String? = null
+) {
+    fun rentMonth(): YearMonth = billingMonth ?: PaymentDateUtils.toYearMonth(paymentDateUtc)
+}

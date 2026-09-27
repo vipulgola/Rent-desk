@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp" android:height="116dp" android:viewportWidth="280" android:viewportHeight="116">
+    <path android:fillColor="@color/address_art_cloud" android:fillAlpha="0.8"
+        android:pathData="M0,116C12,79 33,72 55,84C83,99 107,54 133,63C175,79 214,23 280,21V116Z" />
+    <path android:fillColor="@color/address_art_cloud"
+        android:pathData="M80,29C80,22 85,17 91,18C96,5 112,6 119,18C128,17 134,23 134,29Z" />
+    <path android:fillColor="@color/address_art_building"
+        android:pathData="M63,66H99V116H63ZM207,51H239V116H207Z" />
+    <path android:fillColor="@color/address_art_window"
+        android:pathData="M70,74H77V82H70ZM84,74H91V82H84ZM70,89H77V97H70ZM84,89H91V97H84ZM70,104H77V112H70ZM84,104H91V112H84ZM214,62H221V70H214ZM227,62H234V70H227ZM214,77H221V85H214ZM227,77H234V85H227ZM214,92H221V100H214ZM227,92H234V100H227Z" />
+    <path android:fillColor="@color/address_art_building"
+        android:pathData="M111,116V87L142,58L173,87V116Z" />
+    <path android:fillColor="@color/address_art_roof"
+        android:pathData="M142,58H196L225,87H173Z" />
+    <path android:fillColor="@color/address_art_window"
+        android:pathData="M173,87H225V116H173Z" />
+    <path android:fillColor="@color/address_art_roof"
+        android:pathData="M130,116V97Q130,91 136,91H141Q147,91 147,97V116ZM183,95H194V108H183ZM204,95H215V108H204Z" />
+    <path android:fillColor="@color/address_art_tree"
+        android:pathData="M38,111C22,110 22,97 30,94C24,83 38,77 44,85C55,82 60,96 52,101C55,107 49,112 38,111ZM253,110C241,110 249,78 254,69C259,79 270,110 253,110Z" />
+    <path android:strokeColor="@color/address_art_roof" android:strokeAlpha="0.65"
+        android:strokeWidth="1.5" android:pathData="M39,99V116M254,92V116" />
+    <path android:fillColor="@color/address_art_roof" android:fillType="evenOdd"
+        android:pathData="M170,24C162,24 158,29 158,36C158,44 170,54 170,54C170,54 182,44 182,36C182,29 178,24 170,24ZM170,30A5,5 0,1 0,170 40A5,5 0,1 0,170 30Z" />
+</vector>

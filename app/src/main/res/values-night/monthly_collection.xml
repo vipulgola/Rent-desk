@@ -1,0 +1,5 @@
+<resources>
+    <color name="collection_hero_start">#233F70</color>
+    <color name="collection_hero_end">#192E50</color>
+    <color name="collection_hero_track">#456087</color>
+</resources>

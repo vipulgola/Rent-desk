@@ -92,6 +92,9 @@ class LocalBackupManager(context: Context) {
             },
             properties = backup.data.properties.map {
                 it.copy(
+                    tenantInfo = it.tenantInfo?.let { tenant ->
+                        tenant.copy(tenancyId = tenant.tenancyId ?: "legacy-${it.propertyId}")
+                    },
                     balanceAmount = if (it.propertyId in propertiesWithStoredBalance) {
                         it.balanceAmount
                     } else {
@@ -102,7 +105,10 @@ class LocalBackupManager(context: Context) {
                 )
             },
             transactions = backup.data.transactions.map {
+                val legacyTenant = backup.data.properties.firstOrNull { property -> property.propertyId == it.propertyId }?.tenantInfo
                 it.copy(
+                    tenancyId = it.tenancyId ?: if (backup.data.schemaVersion < 6 && legacyTenant != null)
+                        legacyTenant.tenancyId ?: "legacy-${it.propertyId}" else null,
                     paymentDateUtc = it.paymentDateUtc.takeIf { value -> value > 0L }
                         ?: legacyPaymentDates[it.transactionId]
                         ?: fallbackTime,
@@ -111,6 +117,19 @@ class LocalBackupManager(context: Context) {
                 )
             }
         )
+        require(migratedData.transactions.all { it.billingMonth == null ||
+            (it.billingMonth.year in 1900..2200 && it.billingMonth.month in 1..12) }) { "Invalid rent month in backup" }
+        migratedData.properties.forEach { property ->
+            val tenants = listOfNotNull(property.tenantInfo) + property.tenantHistory.orEmpty().map { it.tenant }
+            require(tenants.mapNotNull { it.tenancyId }.distinct().size == tenants.size) { "Invalid tenant history in backup" }
+            tenants.forEach { tenant ->
+                require(listOf(tenant.depositReceived, tenant.depositDeductions, tenant.depositRefunded)
+                    .all { it.isFinite() && it >= 0 } &&
+                    tenant.depositDeductions + tenant.depositRefunded <= tenant.depositReceived + 0.005) {
+                    "Invalid deposit in backup"
+                }
+            }
+        }
         return createEnvelope(migratedData)
     }
 
@@ -201,6 +220,7 @@ class LocalBackupManager(context: Context) {
                 addEntry(zip, "addresses.csv", addressesCsv(backup))
                 addEntry(zip, "properties.csv", propertiesCsv(backup))
                 addEntry(zip, "tenants.csv", tenantsCsv(backup))
+                addEntry(zip, "tenant_history.csv", tenantHistoryCsv(backup))
                 addEntry(zip, "transactions.csv", transactionsCsv(backup))
                 addEntry(zip, "complete_backup.json", gson.toJson(backup))
                 addEntry(zip, "metadata.json", gson.toJson(metadata(backup)))
@@ -259,7 +279,7 @@ class LocalBackupManager(context: Context) {
     }
 
     private fun tenantsCsv(backup: BackupEnvelope): String = buildString {
-        appendLine("property_id,property_name,tenant_name,mobile,joining_date,aadhaar,address,monthly_rent,electricity_price_per_unit,meter_reading,balance_amount")
+        appendLine("property_id,property_name,tenant_name,mobile,joining_date,aadhaar,address,monthly_rent,electricity_price_per_unit,meter_reading,balance_amount,tenancy_id,deposit_received,deposit_deductions,deposit_refunded,deposit_notes")
         backup.data.properties.forEach { property ->
             property.tenantInfo?.let { tenant ->
                 appendLine(
@@ -278,15 +298,36 @@ class LocalBackupManager(context: Context) {
                         property.monthlyRent.toString(),
                         property.electricityPricePerUnit.toString(),
                         property.meterReading.toString(),
-                        property.balanceAmount.toString()
+                        property.balanceAmount.toString(),
+                        tenant.tenancyId.orEmpty(),
+                        tenant.depositReceived.toString(),
+                        tenant.depositDeductions.toString(),
+                        tenant.depositRefunded.toString(),
+                        tenant.depositNotes.orEmpty()
                     )
                 )
             }
         }
     }
 
+    private fun tenantHistoryCsv(backup: BackupEnvelope): String = buildString {
+        appendLine("property_id,tenancy_id,tenant_name,mobile,joining_date,moved_out_date,monthly_rent,closing_balance,deposit_received,deposit_deductions,deposit_refunded,deposit_held,notes")
+        backup.data.properties.forEach { property ->
+            val records = property.tenantHistory.orEmpty()
+            records.forEach { entry ->
+                val tenant = entry.tenant
+                appendLine(csvRow(property.propertyId, tenant.tenancyId.orEmpty(), tenant.name, tenant.mobileNumber,
+                    "%02d-%02d-%04d".format(tenant.joiningDayOfMonth, tenant.joiningMonthYear.month, tenant.joiningMonthYear.year),
+                    formatUtcTimestamp(entry.vacatedAtUtc), entry.monthlyRent.toString(), entry.closingBalance.toString(),
+                    tenant.depositReceived.toString(), tenant.depositDeductions.toString(), tenant.depositRefunded.toString(),
+                    (tenant.depositReceived - tenant.depositDeductions - tenant.depositRefunded).toString(),
+                    tenant.depositNotes.orEmpty()))
+            }
+        }
+    }
+
     private fun transactionsCsv(backup: BackupEnvelope): String = buildString {
-        appendLine("transaction_id,property_id,payment_date,reading,amount_received,previous_balance,previous_reading,rent_charged,electricity_rate,created_at_utc,modified_at_utc")
+        appendLine("transaction_id,property_id,payment_date,reading,amount_received,previous_balance,previous_reading,rent_charged,electricity_rate,created_at_utc,modified_at_utc,rent_for,tenancy_id")
         backup.data.transactions.filterNot { it.isDeleted }.forEach {
             appendLine(
                 csvRow(
@@ -300,7 +341,9 @@ class LocalBackupManager(context: Context) {
                     it.rentCharged?.toString().orEmpty(),
                     it.electricityRateCharged?.toString().orEmpty(),
                     formatUtcTimestamp(it.createdAtUtc),
-                    formatUtcTimestamp(it.modifiedAtUtc)
+                    formatUtcTimestamp(it.modifiedAtUtc),
+                    it.rentMonth().toString(),
+                    it.tenancyId.orEmpty()
                 )
             )
         }
@@ -358,6 +401,6 @@ class LocalBackupManager(context: Context) {
         .joinToString("") { "%02x".format(it) }
 
     companion object {
-        const val SCHEMA_VERSION = 5
+        const val SCHEMA_VERSION = 6
     }
 }

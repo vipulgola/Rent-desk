@@ -11,7 +11,8 @@ object PaymentUtils {
     fun updatePaymentStatusUI(
         textView: TextView,
         status: RentPaymentStatus,
-        customText: CharSequence? = null
+        customText: CharSequence? = null,
+        showDot: Boolean = false
     ) {
         val context = textView.context
         val (textColorRes, bgColorRes, statusTextRes) = when (status) {
@@ -46,5 +47,13 @@ object PaymentUtils {
         val horizontal = (12 * density).toInt()
         val vertical = (6 * density).toInt()
         textView.setPadding(horizontal, vertical, horizontal, vertical)
+        val dot = if (showDot) GradientDrawable().apply {
+            this.shape = GradientDrawable.OVAL
+            setColor(ContextCompat.getColor(context, textColorRes))
+            val size = (7 * density).toInt()
+            setBounds(0, 0, size, size)
+        } else null
+        textView.setCompoundDrawablesRelative(dot, null, null, null)
+        textView.compoundDrawablePadding = if (showDot) (6 * density).toInt() else 0
     }
 }

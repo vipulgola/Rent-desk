@@ -1,0 +1,34 @@
+<resources>
+    <color name="tenant_detail_page">@color/property_page_background</color>
+    <color name="tenant_detail_surface">@color/app_surface</color>
+    <color name="tenant_detail_outline">@color/outline_soft</color>
+    <color name="tenant_detail_title">@color/text_primary</color>
+    <color name="tenant_detail_secondary">@color/overview_secondary</color>
+    <color name="tenant_detail_header_start">@color/app_surface</color>
+    <color name="tenant_detail_header_end">@color/app_surface</color>
+    <color name="tenant_detail_header_outline">@color/outline_soft</color>
+    <color name="tenant_detail_avatar_background">#223C5C</color>
+    <color name="tenant_detail_avatar_text">#A6CCFF</color>
+    <color name="tenant_detail_active_background">#173B2D</color>
+    <color name="tenant_detail_active_text">#79EDBA</color>
+    <color name="tenant_detail_active_dot">#3FDD92</color>
+    <color name="tenant_detail_active_outline">#246044</color>
+    <color name="tenant_detail_blue_icon">#A3C7FF</color>
+    <color name="tenant_detail_blue_background">#22344C</color>
+    <color name="tenant_detail_orange_icon">#FFC34D</color>
+    <color name="tenant_detail_orange_background">#3D321B</color>
+    <color name="tenant_detail_green_icon">#71E8BA</color>
+    <color name="tenant_detail_green_background">#183B30</color>
+    <color name="tenant_detail_purple_icon">#C5B8FF</color>
+    <color name="tenant_detail_purple_background">#30294B</color>
+    <color name="tenant_detail_history_background">@color/app_surface</color>
+    <color name="tenant_detail_history_end">@color/app_surface</color>
+    <color name="tenant_detail_history_text">@color/brand_primary</color>
+    <color name="tenant_detail_history_outline">@color/outline_soft</color>
+    <color name="tenant_detail_deposit_background">@color/app_surface</color>
+    <color name="tenant_detail_deposit_text">@color/brand_primary</color>
+    <color name="tenant_detail_deposit_outline">@color/outline_soft</color>
+    <color name="tenant_detail_vacate_background">@color/app_surface</color>
+    <color name="tenant_detail_vacate_text">#FF7889</color>
+    <color name="tenant_detail_vacate_outline">#F16576</color>
+</resources>

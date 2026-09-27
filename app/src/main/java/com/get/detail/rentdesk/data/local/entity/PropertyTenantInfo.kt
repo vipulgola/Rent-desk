@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
 import com.get.detail.rentdesk.domain.model.TenantInfo
+import com.get.detail.rentdesk.domain.model.TenantHistoryEntry
 
 @Entity(tableName = "property_tenant_info")
 data class PropertyTenantInfo(
@@ -23,5 +24,7 @@ data class PropertyTenantInfo(
     @ColumnInfo(defaultValue = "0")
     val createdAtUtc: Long = System.currentTimeMillis(),
     @ColumnInfo(defaultValue = "0")
-    val modifiedAtUtc: Long = createdAtUtc
+    val modifiedAtUtc: Long = createdAtUtc,
+    val tenantHistory: List<TenantHistoryEntry>? = null,
+    val unassignedBalance: Double? = null
 )

@@ -40,3 +40,8 @@ selects a dd/mm/yyyy payment date and current reading, then sees electricity cos
 previous balance, rent, and the total to collect before entering the amount
 received. Saving updates the property reading and balance together with the
 new transaction. These values are included in JSON backups and CSV exports.
+
+When calculating rent, electricity usage below 10 units (current reading minus previous
+reading) has a minimum charge of Rs 100, including zero usage. At 10 units or
+more, the usual per-unit rate applies. Monthly totals and balance recalculations
+use the same rule.

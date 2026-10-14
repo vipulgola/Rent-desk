@@ -63,6 +63,7 @@
         android:id="@+id/rv_transactions"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/app_background"
         android:clipToPadding="false"
         android:paddingStart="18dp"
         android:paddingTop="12dp"

@@ -16,6 +16,7 @@
     <color name="app_background">#151719</color>
     <color name="app_surface">#1C1F22</color>
     <color name="app_surface_variant">#272B2F</color>
+    <color name="transaction_card_background">@color/app_surface</color>
     <color name="text_primary">#E5E3DE</color>
     <color name="text_secondary">#BEC0C4</color>
     <color name="overview_secondary">#BEC0C4</color>
